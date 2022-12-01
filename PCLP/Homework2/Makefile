@@ -1,34 +1,32 @@
-####Copyright 2022 Stoica Bogdan (bogdanstoicasn@yahoo.com)
+####Copyright 2022 Stoica Bogdan 315CA(bogdanstoicasn@yahoo.com)
 # compilator
 CC = gcc
-OUT=test
-# flaguri pentru warninguri
+OUT=my_octave
+# flags for warnings
 CFLAGS = -Wall -Wextra -std=c99
 
-# fisiere obiect create la build
+# object files created at build
 OBJ = function.o main.o
 
-#build program -- echivalent gcc function.o main.o -o 
+# program build -- same as: gcc function.o main.o -o 
 build: function main
-	$(CC) $(OBJ) -o ./$(OUT)
+	$(CC) $(OBJ) -o ./$(OUT) -lm
 
-# compilare functii -- echivalent gcc --Wall -Wextra -c function.h function.c 
+# function compilation -- same as: gcc --Wall -Wextra -c function.h function.c 
 function: function.h function.c
-	$(CC) $(CFLAGS) -c $@.c
+	$(CC) $(CFLAGS) -c $@.c -lm
 
-# compilare functia main -- echivalent gcc --Wall -Wextra -c main.c 
+# main function compilation -- same as: gcc --Wall -Wextra -c main.c 
 main: main.c
-	$(CC) $(CFLAGS) -c $@.c
+	$(CC) $(CFLAGS) -c $@.c -lm 
 
-#pentru rulare
+#run
 run: build
 	./$(OUT)
 
 #clean
 clean:
 	rm -f *.o ./$(OUT)
-
-#pack	
 pack:
 	zip -FSr 315CA_MihaiBogdanStoica_Tema2.zip README Makefile *.c *.h
 	
