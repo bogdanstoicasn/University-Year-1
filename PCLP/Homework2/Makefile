@@ -1,4 +1,4 @@
-####Copyright 2022 Stoica Bogdan 315CA(bogdanstoicasn@yahoo.com)
+####Copyright 2022-2023 Stoica Mihai-Bogdan 315CA(bogdanstoicasn@yahoo.com)
 # compilator
 CC = gcc
 OUT=my_octave
@@ -28,6 +28,6 @@ run: build
 clean:
 	rm -f *.o ./$(OUT)
 pack:
-	zip -FSr 315CA_MihaiBogdanStoica_Tema2.zip README Makefile *.c *.h
+	zip -FSr 315CA_StoicaMihaiBogdan_Tema2.zip README Makefile *.c *.h
 	
 .PHONY: pack clean
