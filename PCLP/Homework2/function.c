@@ -386,40 +386,41 @@ void Strassen_algorithm_helper(int **a,int **b,int **c,int size) {
         free_matrix(new_size,m7);
     }
 }
-void Strassen_algorithm(int **a,int **b,int **c,int line) {
+void Strassen_algorithm(int **first,int **second,int **third,int line) {
     int s=nextpower2of2(line);
-    int **copya=alloc_matrix(line,line);
-    if(!copya) fprintf(stderr,"alloc matrix failed\n");
+    int **copyfirst=alloc_matrix(line,line);
+    if(!copyfirst) fprintf(stderr,"alloc matrix failed\n");
     for(int i=0; i<line;i++) {
         for(int j=0; j<line; j++) {
-            copya[i][j]=a[i][j];
+            copyfirst[i][j]=first[i][j];
         }
     }
-    int **copyb=alloc_matrix(line,line);
-    if(!copyb) fprintf(stderr,"alloc matrix failed\n");
+    int **copysecond=alloc_matrix(line,line);
+    if(!copysecond) fprintf(stderr,"alloc matrix failed\n");
     for(int i=0; i<line;i++) {
         for(int j=0; j<line; j++) {
-            copyb[i][j]=b[i][j];
+            copysecond[i][j]=second[i][j];
         }
     }
-    int **copyc=alloc_matrix(line,line);
-    if(!copyc) fprintf(stderr,"alloc matrix failed\n");
-    Strassen_algorithm_helper(copya,copyb,copyc,s);
+    int **copythird=alloc_matrix(line,line);
+    if(!copythird) fprintf(stderr,"alloc matrix failed\n");
+    /// Here the magic takes place
+    Strassen_algorithm_helper(copyfirst,copysecond,copythird,s);
     for(int i=0; i<line; i++) {
         for(int j=0; j<line; j++) {
-            c[i][j]=copyc[i][j];
+            third[i][j]=copythird[i][j];
         }
     }
     /// Free memory again. This gettin annoying
-    free_matrix(line,copya);
-    free_matrix(line,copyb);
-    free_matrix(line,copyc);
+    free_matrix(line,copyfirst);
+    free_matrix(line,copysecond);
+    free_matrix(line,copythird);
 }
-void transform(int line,int **c) {
+void transform(int line,int **matrix) {
     for(int i=0; i<line; i++) {
         for(int j=0; j<line; j++) {
-            if(c[i][j]>=0) c[i][j]=c[i][j]%10007;
-            else c[i][j]=c[i][j]%10007+10007;
+            if(matrix[i][j]>=0) matrix[i][j]=matrix[i][j]%10007;
+            else matrix[i][j]=matrix[i][j]%10007+10007;
         }
     }
 }
