@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "function.h"
-#include <math.h>
+#define NMAX 10007
 struct octave
 {
     int line;
     int coloumn;
     int **matrix;
 };
-/// Wwap 2 elements
+/// Swap 2 elements
 void swap(int *a,int *b) {
     int aux=*a;
     *a=*b;
@@ -88,25 +88,25 @@ void matrix_multiplication(int line1,int line2,int coloumn2,int **first,int **se
             for(j=0; j<coloumn2; j++) {
                 third[i][j]=0;
                 for(k=0; k<line2; k++) {
-                   if(first[i][k]*second[k][j]>=0) third[i][j]+=((first[i][k]*second[k][j])%10007);
-                   else third[i][j]=third[i][j]+(first[i][k]*second[k][j])%10007+10007;
+                   if(first[i][k]*second[k][j]>=0) third[i][j]+=((first[i][k]*second[k][j])%NMAX);
+                   else third[i][j]=third[i][j]+(first[i][k]*second[k][j])%NMAX+NMAX;
                 }
             }
         }
         for(i=0; i<line1; i++)
             for(j=0; j<coloumn2; j++)
-                third[i][j]=third[i][j]%10007;
+                third[i][j]=third[i][j]%NMAX;
 }
 /// Sum of elements 
 int sum_elements_matrix(int line,int coloumn,int **matrix) {
     int s=0;
     for(int i=0; i<line; i++) {
         for(int j=0; j<coloumn; j++) {
-           if(matrix[i][j]>=0) s=s+matrix[i][j]%10007;
-           else s=s+(matrix[i][j]%10007+10007);
+           if(matrix[i][j]>=0) s=s+matrix[i][j]%NMAX;
+           else s=s+(matrix[i][j]%NMAX+NMAX);
         }
     }
-    s=s%10007;
+    s=s%NMAX;
     return s;
 }
 /// Sorts the matrixes by element sum
@@ -201,14 +201,14 @@ void square_matrix_multiplication(int line,int **first,int **second) {
         for(int j=0; j<line; j++) {
             third[i][j]=0;
             for(int k=0; k<line; k++) {
-                if(first[i][k]*second[k][j]>=0) third[i][j]+=((first[i][k]*second[k][j])%10007);
-                else third[i][j]=third[i][j]+(first[i][k]*second[k][j])%10007+10007;
+                if(first[i][k]*second[k][j]>=0) third[i][j]+=((first[i][k]*second[k][j])%NMAX);
+                else third[i][j]=third[i][j]+(first[i][k]*second[k][j])%NMAX+NMAX;
             }
         }
     }
     for(int i=0; i<line; i++) {
         for(int j=0; j<line; j++) {
-            third[i][j]=third[i][j]%10007;
+            third[i][j]=third[i][j]%NMAX;
             first[i][j]=third[i][j];
         }
     }
@@ -246,9 +246,7 @@ void matrix_pow(int line,int coloumn,int pow,int **matrix) {
 /// Recursive
 /// It's bellow
 /// It took me 2 days :((
-int nextpower2of2(int k) {
-    return pow(2,ceil(log2(k)));
-}
+
 /// 1 matrix + 1 matrix = matrix
 void add(int **first,int **second,int **third,int line) {
     for(int i=0; i<line; i++) {
@@ -265,12 +263,14 @@ void sub(int **first,int **second,int **third,int line) {
         }
     }
 }
+/// a is first matrix, b is second ,and we return their product in c
 void Strassen_algorithm_helper(int **a,int **b,int **c,int size) {
     /// This case was the easiest
     if(size==1) {
         c[0][0]=a[0][0]*b[0][0];
     } else {
         int new_size=size/2;
+        /// We partition the matrixes in 4 equal squares, but first we alloc those squares
         int **a11=alloc_matrix(new_size,new_size);
         int **a12=alloc_matrix(new_size,new_size);
         int **a21=alloc_matrix(new_size,new_size);
@@ -293,7 +293,8 @@ void Strassen_algorithm_helper(int **a,int **b,int **c,int size) {
         int **aResult=alloc_matrix(new_size,new_size);
         int **bResult=alloc_matrix(new_size,new_size);
         /// Sorry again :)))
-        if(!a11 || !a12 || !a21 || !a22 || !b11 || !b12 || !b21 || !b22 || !c11 || !c12 || !c21 || !c22 || !m1 || !m2 || !m3 || !m4 || !m5 || !m6 || !m7 || !aResult || !bResult) fprintf(stderr,"alloc matrix failed\n");
+        if(!a11 || !a12 || !a21 || !a22 || !b11 || !b12 || !b21 || !b22 || !c11 || !c12 || !c21 || !c22 || !m1 || !m2 || !m3 || !m4 || !m5 || !m6 || !m7 || !aResult || !bResult) 
+            fprintf(stderr,"alloc matrix failed\n");
         int i,j;
         for(i=0; i<new_size; i++) {
             for(j=0; j<new_size; j++) {
@@ -309,49 +310,70 @@ void Strassen_algorithm_helper(int **a,int **b,int **c,int size) {
             }
         }
         /// Calculating m1 to m7:
-        add(a11, a22, aResult, new_size); /// a11 + a22
-        add(b11, b22, bResult, new_size); /// b11 + b22
-        Strassen_algorithm_helper(aResult, bResult, m1, new_size);
+
+        /// a11 + a22
+        add(a11, a22, aResult, new_size); 
+        /// b11 + b22
+        add(b11, b22, bResult, new_size); 
         /// m1 = (a11+a22) * (b11+b22)
+        Strassen_algorithm_helper(aResult, bResult, m1, new_size);
 
-        add(a21, a22, aResult, new_size); /// a21 + a22
-        Strassen_algorithm_helper(aResult, b11, m2, new_size);
+        /// a21 + a22
+        add(a21, a22, aResult, new_size);
         /// m2 = (a21+a22) * (b11)
+        Strassen_algorithm_helper(aResult, b11, m2, new_size);
 
-        sub(b12, b22, bResult, new_size); /// b12 - b22
-        Strassen_algorithm_helper(a11, bResult, m3, new_size);
+        /// b12 - b22
+        sub(b12, b22, bResult, new_size);
         /// m3 = (a11) * (b12 - b22)
+        Strassen_algorithm_helper(a11, bResult, m3, new_size);
 
-        sub(b21, b11, bResult, new_size); /// b21 - b11
-        Strassen_algorithm_helper(a22, bResult, m4, new_size);
+        /// b21 - b11
+        sub(b21, b11, bResult, new_size);
         /// m4 = (a22) * (b21 - b11)
+        Strassen_algorithm_helper(a22, bResult, m4, new_size);
 
-        add(a11, a12, aResult, new_size); /// a11 + a12
-        Strassen_algorithm_helper(aResult, b22, m5, new_size);
+        /// a11 + a12
+        add(a11, a12, aResult, new_size);
         /// m5 = (a11+a12) * (b22)
+        Strassen_algorithm_helper(aResult, b22, m5, new_size);
 
-        sub(a21, a11, aResult, new_size); /// a21 - a11
-        add(b11, b12, bResult, new_size); /// b11 + b12
-        Strassen_algorithm_helper(aResult, bResult, m6, new_size);
+        /// a21 - a11
+        sub(a21, a11, aResult, new_size); 
+        /// b11 + b12
+        add(b11, b12, bResult, new_size); 
         /// m6 = (a21-a11) * (b11+b12)
+        Strassen_algorithm_helper(aResult, bResult, m6, new_size);
+        
 
-        sub(a12, a22, aResult, new_size); /// a12 - a22
-        add(b21, b22, bResult, new_size); /// b21 + b22
+        /// a12 - a22
+        sub(a12, a22, aResult, new_size); 
+        /// b21 + b22
+        add(b21, b22, bResult, new_size);
+        /// m7 = (a12-a22) * (b21+b22) 
         Strassen_algorithm_helper(aResult, bResult, m7, new_size);
-        /// m7 = (a12-a22) * (b21+b22)
+        
 
         /// Calculating c11,c12,c21,c22:
 
-        add(m3, m5, c12, new_size); /// c12 = m3 + m5
-        add(m2, m4, c21, new_size); /// c21 = m2 + m4
+        /// c12 = m3 + m5
+        add(m3, m5, c12, new_size); 
+        /// c21 = m2 + m4
+        add(m2, m4, c21, new_size); 
 
-        add(m1, m4, aResult, new_size); /// m1 + m4
-        add(aResult, m7, bResult, new_size); /// m1 + m4 + m7
-        sub(bResult, m5, c11, new_size); /// c11 = m1 + m4 - m5 + m7
+        /// m1 + m4
+        add(m1, m4, aResult, new_size); 
+        /// m1 + m4 + m7
+        add(aResult, m7, bResult, new_size);
+        /// c11 = m1 + m4 - m5 + m7 
+        sub(bResult, m5, c11, new_size); 
 
-        add(m1, m3, aResult, new_size); /// m1 + m3
-        add(aResult, m6, bResult, new_size);  /// m1 + m3 + m6
-        sub(bResult, m2, c22, new_size); /// c22 = m1 + m3 - m2 + m6
+        /// m1 + m3
+        add(m1, m3, aResult, new_size); 
+        /// m1 + m3 + m6
+        add(aResult, m6, bResult, new_size);
+        /// c22 = m1 + m3 - m2 + m6  
+        sub(bResult, m2, c22, new_size); 
 
         /// Grouping in a single matrix:
         for (i = 0; i < new_size; i++) {
@@ -386,8 +408,8 @@ void Strassen_algorithm_helper(int **a,int **b,int **c,int size) {
         free_matrix(new_size,m7);
     }
 }
+/// This is the Strassen function
 void Strassen_algorithm(int **first,int **second,int **third,int line) {
-    int s=nextpower2of2(line);
     int **copyfirst=alloc_matrix(line,line);
     if(!copyfirst) fprintf(stderr,"alloc matrix failed\n");
     for(int i=0; i<line;i++) {
@@ -405,7 +427,7 @@ void Strassen_algorithm(int **first,int **second,int **third,int line) {
     int **copythird=alloc_matrix(line,line);
     if(!copythird) fprintf(stderr,"alloc matrix failed\n");
     /// Here the magic takes place
-    Strassen_algorithm_helper(copyfirst,copysecond,copythird,s);
+    Strassen_algorithm_helper(copyfirst,copysecond,copythird,line);
     for(int i=0; i<line; i++) {
         for(int j=0; j<line; j++) {
             third[i][j]=copythird[i][j];
@@ -419,8 +441,8 @@ void Strassen_algorithm(int **first,int **second,int **third,int line) {
 void transform(int line,int **matrix) {
     for(int i=0; i<line; i++) {
         for(int j=0; j<line; j++) {
-            if(matrix[i][j]>=0) matrix[i][j]=matrix[i][j]%10007;
-            else matrix[i][j]=matrix[i][j]%10007+10007;
+            if(matrix[i][j]>=0) matrix[i][j]=matrix[i][j]%NMAX;
+            else matrix[i][j]=matrix[i][j]%NMAX+NMAX;
         }
     }
 }

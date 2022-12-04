@@ -1,7 +1,5 @@
 /// Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+
 struct octave;
 void swap(int *a,int *b);
 int **alloc_matrix(int line, int coloumn);

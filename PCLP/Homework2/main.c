@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "function.h"
-#include <math.h>
 struct octave
 {
     int line,coloumn;
@@ -80,6 +79,7 @@ int main()
                 break;
             } case 'C': {   /// resizing matrix + deleting old matrix + we put new resized matrix in place 
                 index=read_function();
+                /// We use complement_function_C when index does not exist
                 if(index>=size || index<0) complement_function_C();
                 else {
                     int **pointer=vector[index].matrix,l=vector[index].line;
