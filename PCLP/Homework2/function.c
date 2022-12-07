@@ -16,6 +16,7 @@ void swap(int *a,int *b) {
     *b=aux;
 }
 /// Matrix dinamicaly alocated with defensive programming
+/// We alloc vector of vectors then every vector
 int **alloc_matrix(int line, int coloumn) {
 	int **a = (int **)malloc(line * sizeof(int *)); 
     if (!a) {
@@ -30,7 +31,6 @@ int **alloc_matrix(int line, int coloumn) {
 				free(a[i]);
 			}
 			free(a);
-
 			return NULL;
 		}
 	}

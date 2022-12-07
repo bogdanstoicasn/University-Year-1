@@ -33,7 +33,7 @@ intr-o zona de memorie care nu ii apartinea. Am rezolvat aceasta problema prin
 simplificarea functiei de inmultire("matrix_multiplication"): am scos conditia 
 care verifica daca numarul de coloane din prima matrice este egal cu numarul 
 de linii din a doua matrice, si am lasat doar inmultirea, care se petrece in
-conditii optime. Verific conditia de mai sus direct in fisierul "main.c", astfel
+conditii optime. Verific conditia de mai sus direct in fisierul "main.c",astfel
 programul meu ruland fara probleme.
 
 Eliminarea unui element se face prin stergerea din memorie("free_matrix") a 
@@ -41,7 +41,7 @@ matricei corespunzatoare si deplasarea cu o pozitie inapoi,
 a elementelor ce il urmeaza.
 
 Operatia de ordonare:
-	-se foloseste metoda bulelor(nu prea eficienta);
+	-se foloseste o sortare cu O(n^2) pasi;
 	-se interschimba valorile vectorului de structuri cand se indeplineste 
 	conditia ceruta;
 
