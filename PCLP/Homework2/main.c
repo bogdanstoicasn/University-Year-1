@@ -17,7 +17,14 @@ int main()
         switch(character) {
             case 'L': {   /// we allocating/reallocating the vector of struct
                 vector=realloc(vector,(++size)*sizeof(struct octave));
-                if(!vector) return 0;
+                if(!vector) {
+                    fprintf(stderr,"not alloc");
+                    for(int i=0; i<size; i++) {
+                        free_matrix(vector[i].line, vector[i].matrix);
+                    }
+                    free(vector);
+                    return -1;
+                }
                 vector[size-1].line=read_function();
                 vector[size-1].coloumn=read_function();
                 (vector+size-1)->matrix=alloc_matrix((vector+size-1)->line,(vector+size-1)->coloumn);
@@ -52,7 +59,15 @@ int main()
                 else {
                     if(vector[index].coloumn!=vector[index1].line) printf("Cannot perform matrix multiplication\n");
                     else {
-                        vector=(struct octave*)realloc(vector,(++size)*sizeof(struct octave));
+                    vector=(struct octave*)realloc(vector,(++size)*sizeof(struct octave));
+                    if(!vector) {
+                        fprintf(stderr,"not alloc");
+                        for(int i=0; i<size; i++) {
+                            free_matrix(vector[i].line, vector[i].matrix);
+                        }
+                        free(vector);
+                        return -1;
+                    }
                     vector[size-1].line=vector[index].line;
                     vector[size-1].coloumn=vector[index1].coloumn;
                     (vector+size-1)->matrix=alloc_matrix(vector[size-1].line,vector[size-1].coloumn);
@@ -71,7 +86,6 @@ int main()
                 else {
                     int **pointer=vector[index].matrix;
                     int linie=vector[index].line;
-                    if(!pointer) return 0;
                     vector[index].matrix=transposition_matrix(vector[index]);
                     swap(&vector[index].line,&vector[index].coloumn);
                     free_matrix(linie,pointer);
@@ -83,7 +97,6 @@ int main()
                 if(index>=size || index<0) complement_function_C();
                 else {
                     int **pointer=vector[index].matrix,l=vector[index].line;
-                    if(!pointer) return 0;
                     vector[index].matrix=resize_matrix(&vector[index].line,&vector[index].coloumn,vector[index].matrix);
                     free_matrix(l,pointer);
 
@@ -107,6 +120,14 @@ int main()
                     if(vector[index].line!=vector[index1].line) printf("Cannot perform matrix multiplication\n");
                     else {
                         vector=(struct octave*)realloc(vector,(++size)*sizeof(struct octave));
+                        if(!vector) {
+                            fprintf(stderr,"not alloc");
+                            for(int i=0; i<size; i++) {
+                                free_matrix(vector[i].line, vector[i].matrix);
+                            }
+                            free(vector);
+                            return -1;
+                        }
                         vector[size-1].line=vector[index].line;
                         vector[size-1].coloumn=vector[index1].coloumn;
                         (vector+size-1)->matrix=alloc_matrix(vector[size-1].line,vector[size-1].coloumn);
