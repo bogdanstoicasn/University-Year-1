@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 #include "function.h"
+#define NMAX 30
 struct global_image
 {
     char type[3];
@@ -11,17 +11,18 @@ struct global_image
     int maxValue;
     int **red;
     int **green;
-    int **blue; 
+    int **blue;
 };
-
 int main()
 {
-    int contor=0;
+    char s[NMAX];
     struct global_image image;
-    FILE *pointer=fopen("cup.pgm","r"),*out=fopen("out.pgm","w");
-    open_text_file(&image,pointer);
-    print_text_file(image,out);
-    contor=1;
-    if(contor==1) free_matrix(image.height,image.red);
+    int type_determine,type;
+    FILE *fptr=NULL;
+    type_determine=file_type(fptr,s);
+    file_reader_first_version(s,type_determine,fptr,&image);
+    printf("type==%d\n%s\n%d %d\n%d\n",type_determine,image.type,image.width,image.height,image.maxValue);
+    file_printer_for_tests(&type,image);
+    free_global_matrix(type_determine,&image);
     return 0;
 }
