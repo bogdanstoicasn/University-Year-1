@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "function.h"
+#include <string.h>
 #define NMAX 30
 struct global_image
 {
@@ -112,6 +113,16 @@ int file_type(FILE *fptr,char s[NMAX])
     }
     ignore_comments(fptr);
     fscanf(fptr,"%s",determine_type);
+    if(determine_type[0]!='P') {
+        printf("not p\n");
+        fclose(fptr);
+        return 0;
+    }
+    if(determine_type[1]>='7' || determine_type[1]<='1' || determine_type[1]=='4' || determine_type[2]!=0) {
+        printf("not num\n");
+        fclose(fptr);
+        return 0;
+    }
     switch(determine_type[1])
     {
         case '2':
@@ -293,6 +304,7 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
 void file_printer_for_tests(int *type,struct global_image image)
 {   
     char file[NMAX];
+    printf("Name output file: ");
     scanf("%s",file);
     printf("\nChoose type:");
     scanf("%d",type);

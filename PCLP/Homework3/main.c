@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include "function.h"
 #define NMAX 30
 struct global_image
@@ -20,9 +21,14 @@ int main()
     int type_determine,type;
     FILE *fptr=NULL;
     type_determine=file_type(fptr,s);
-    file_reader_first_version(s,type_determine,fptr,&image);
+    printf("!!!!!!%d\n",type_determine);
+    if(type_determine!=0)
+    {
+        file_reader_first_version(s,type_determine,fptr,&image);
     printf("type==%d\n%s\n%d %d\n%d\n",type_determine,image.type,image.width,image.height,image.maxValue);
     file_printer_for_tests(&type,image);
     free_global_matrix(type_determine,&image);
+    }
+    else printf("workkkk");
     return 0;
 }
