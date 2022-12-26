@@ -335,13 +335,37 @@ void file_printer_for_tests(int *type,struct global_image image)
             }
             fprintf(output,"\n");
         }
+        break;
     case 5:
-        
+        fprintf(output,"P5\n%d %d\n%d\n",image.width,image.height,image.maxValue);
+        for(int i=0; i<image.height; i++)
+        {
+            for(int j=0; j<image.width; j++)
+            {
+                unsigned char c=(char)image.red[i][j];
+                fwrite(&c,sizeof(unsigned char),1,output);
+            }
+        }
         break;
     case 6:
+        fprintf(output,"P6\n%d %d\n%d\n",image.width,image.height,image.maxValue);
+        for(int i=0; i<image.height; i++)
+        {
+            for(int j=0; j<image.width; j++)
+            {
+                unsigned char c=(char)image.red[i][j];
+                fwrite(&c,sizeof(unsigned char),1,output);
 
+                unsigned char d=(char)image.green[i][j];
+                fwrite(&d,sizeof(unsigned char),1,output);
+                
+                unsigned char e=(char)image.blue[i][j];
+                fwrite(&e,sizeof(unsigned char),1,output);
+            }
+        }
         break;
     default:
+        printf("not ppm or pgm\n");
         break;
     }
     fclose(output);
