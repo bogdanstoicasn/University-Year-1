@@ -13,9 +13,17 @@ struct global_image
     int **red;
     int **green;
     int **blue;
+    int **red_crop;
+    int **green_crop;
+    int **blue_crop;
 };
 // Function to ignore any comments
 // in file
+int max_of_numbers(int a,int b)
+{
+    if(a>b) return a;
+    else return b;
+}
 void ignore_comments(FILE* fp)
 {
     int ch;
@@ -68,22 +76,30 @@ void free_global_matrix(int type,struct global_image* image)
     {
         case 2:
             free_matrix(image->height,image->red);
+            //free_matrix(image->height,image->red_crop);
             break;
         case 3:
             {
             free_matrix(image->height,image->red);
             free_matrix(image->height,image->green);
             free_matrix(image->height,image->blue);
+            //free_matrix(image->height,image->red_crop);
+            //free_matrix(image->height,image->green_crop);
+            //free_matrix(image->height,image->blue_crop);
             break;
             }
         case 5:
             free_matrix(image->height,image->red);
+            //free_matrix(image->height,image->red_crop);
             break;
         case 6:
             {
             free_matrix(image->height,image->red);
             free_matrix(image->height,image->green);
             free_matrix(image->height,image->blue);
+            //free_matrix(image->height,image->red_crop);
+            //free_matrix(image->height,image->green_crop);
+            //free_matrix(image->height,image->blue_crop);
             break;
             }
         default:
@@ -104,7 +120,6 @@ void print_matrix(struct global_image element) {
 int file_type(FILE *fptr,char s[NMAX])
 {
     char determine_type[3];
-    scanf("%s",s);
     fptr=fopen(s,"r");
     if(!fptr)
     {
@@ -180,6 +195,7 @@ void text_file_reader_pgm_edition(char s[NMAX],FILE *fptr,struct global_image* i
 
     ignore_comments(fptr);
     image->red=alloc_matrix(image->height,image->width);
+    
     if(!image->red)
     {
         fprintf(stderr,"Failed to load %s\n",s);
@@ -370,5 +386,98 @@ void file_printer_for_tests(int *type,struct global_image image)
     }
     fclose(output);
 }
+int operation_identifier(char s[NMAX],int *x1,int *y1, int *x2,int *y2,int *h1,int *h2,
+                        int *angle,char parametre[NMAX],struct global_image image)
+{
+    char string[NMAX];
+    fgets(string,NMAX,stdin);
+    string[strlen(string)-1]='\0';
+    char *p=strtok(string," ");
 
+    ///load
+    if(strcmp(p,"LOAD")==0){
+        p=strtok(NULL," ");
+        strcpy(s,p);
+        return 1;
+    }
+
+    /// select
+    if(strcmp(p,"SELECT")==0) {
+        int contor=0,cpx1,cpx2,cpy1,cpy2;
+        while(p)
+        {
+            if(p[0]>='A' && p[0]<='Z') ; 
+            else
+            {
+            if(contor==0)
+            {
+                cpx1=atoi(p);
+            }
+            if(contor==1)
+            {
+                cpy1=atoi(p);
+            }
+            if(contor==2)
+            {
+                cpx2=atoi(p);
+            }
+            if(contor==3)
+            {
+               cpy2=atoi(p);
+            }
+            contor++;
+            }
+        p = strtok(NULL, " ");
+        }
+        if(contor == 0) return 3;
+        else if(contor ==4) {
+            if(max_of_numbers(cpx1,cpx2)>image.width) 
+            {
+                printf("Invalid coordinates\n");
+                return 0;
+            }
+            if(max_of_numbers(cpy1,cpy2)>image.height) 
+            {
+                printf("Invalid coordinates\n");
+                return 0;
+            }
+            *x1=cpx1; *x2=cpx2; *y1=cpy1; *y2=cpy2;
+            return 2;
+        }
+        else {
+            printf("not enough numbers\n"); return 0;
+        }
+    }
+    ///histogram
+    if(strcmp(p,"HISTOGRAM")==0) {
+        if(image.type[1]=='3' || image.type[1]=='6') {
+            printf("Black and white image needed\n");
+            return 0;
+        }
+        int contor=0;
+        while(p)
+        {
+            if(p[0]>='A' && p[0]<='Z') ; 
+            else
+            {
+            if(contor==0)
+            {
+                *h1=atoi(p);
+            }
+            if(contor==1)
+            {
+                *h2=atoi(p);
+            }
+            contor++;
+            }
+        p = strtok(NULL, " ");
+        }
+        return 4;
+    }
+    if(strcmp(p,"EXIT")==0)
+    {
+        return 10;
+    }
+    return 0;
+}
 
