@@ -80,34 +80,36 @@ void free_matrix(int line,int **matrix) {
 /// function which frees memory by type
 void free_global_matrix(int type,struct global_image* image)
 {
+    if(type==0) return ;
+    
     switch(type)
     {
         case 2:
             free_matrix(image->height,image->red);
-            //free_matrix(image->height,image->red_crop);
+            free_matrix(image->height,image->red_crop);
             break;
         case 3:
             {
             free_matrix(image->height,image->red);
             free_matrix(image->height,image->green);
             free_matrix(image->height,image->blue);
-            //free_matrix(image->height,image->red_crop);
-            //free_matrix(image->height,image->green_crop);
-            //free_matrix(image->height,image->blue_crop);
+            free_matrix(image->height,image->red_crop);
+            free_matrix(image->height,image->green_crop);
+            free_matrix(image->height,image->blue_crop);
             break;
             }
         case 5:
             free_matrix(image->height,image->red);
-            //free_matrix(image->height,image->red_crop);
+            free_matrix(image->height,image->red_crop);
             break;
         case 6:
             {
             free_matrix(image->height,image->red);
             free_matrix(image->height,image->green);
             free_matrix(image->height,image->blue);
-            //free_matrix(image->height,image->red_crop);
-            //free_matrix(image->height,image->green_crop);
-            //free_matrix(image->height,image->blue_crop);
+            free_matrix(image->height,image->red_crop);
+            free_matrix(image->height,image->green_crop);
+            free_matrix(image->height,image->blue_crop);
             break;
             }
         default:
@@ -137,12 +139,10 @@ int file_type(FILE *fptr,char s[NMAX])
     ignore_comments(fptr);
     fscanf(fptr,"%s",determine_type);
     if(determine_type[0]!='P') {
-        printf("not p\n");
         fclose(fptr);
         return 0;
     }
     if(determine_type[1]>='7' || determine_type[1]<='1' || determine_type[1]=='4' || determine_type[2]!=0) {
-        printf("not num\n");
         fclose(fptr);
         return 0;
     }
@@ -208,6 +208,7 @@ void text_file_reader_pgm_edition(char s[NMAX],FILE *fptr,struct global_image* i
 
     ignore_comments(fptr);
     image->red=alloc_matrix(image->height,image->width);
+    image->red_crop=alloc_matrix(image->height,image->width);
     
     if(!image->red)
     {
@@ -220,7 +221,9 @@ void text_file_reader_pgm_edition(char s[NMAX],FILE *fptr,struct global_image* i
         {
             int x;
             fscanf(fptr,"%d",&x);
+            
             image->red[i][j]=x;
+            image->red_crop[i][j]=x;
         }
     }
     fclose(fptr);
@@ -242,6 +245,10 @@ void text_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image* i
     image->red=alloc_matrix(image->height,image->width);
     image->green=alloc_matrix(image->height,image->width);
     image->blue=alloc_matrix(image->height,image->width);
+
+    image->red_crop=alloc_matrix(image->height,image->width);
+    image->green_crop=alloc_matrix(image->height,image->width);
+    image->blue_crop=alloc_matrix(image->height,image->width);
     if(!image->red || !image->green || !image->blue)
     {
         fprintf(stderr,"Failed to load %s\n",s);
@@ -256,6 +263,10 @@ void text_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image* i
             image->red[i][j]=x;
             image->green[i][j]=y;
             image->blue[i][j]=z;
+
+            image->red_crop[i][j]=x;
+            image->green_crop[i][j]=y;
+            image->blue_crop[i][j]=z;
         }
     }
     fclose(fptr);
@@ -272,7 +283,10 @@ void binary_file_reader_pgm_edition(char s[NMAX],FILE *fptr, struct global_image
 
     ignore_comments(fptr);
     fscanf(fptr,"%d",&image->maxValue);
+    
     image->red=alloc_matrix(image->height,image->width);
+    image->red_crop=alloc_matrix(image->height,image->width);
+
     if(!image->red)
     {
         fprintf(stderr,"Failed to load %s\n",s);
@@ -284,7 +298,9 @@ void binary_file_reader_pgm_edition(char s[NMAX],FILE *fptr, struct global_image
         {
             unsigned char c;
             fread(&c,sizeof(unsigned char),1,fptr);
+            
             image->red[i][j]=(int)c;
+            image->red_crop[i][j]=(int)c;
         }
     }
     fclose(fptr);
@@ -302,9 +318,15 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
     ignore_comments(fptr);
     fscanf(fptr,"%d",&image->maxValue);
     ignore_comments(fptr);
+
     image->red=alloc_matrix(image->height,image->width);
     image->green=alloc_matrix(image->height,image->width);
     image->blue=alloc_matrix(image->height,image->width);
+
+    image->red_crop=alloc_matrix(image->height,image->width);
+    image->green_crop=alloc_matrix(image->height,image->width);
+    image->blue_crop=alloc_matrix(image->height,image->width);
+
     if(!image->red || !image->green || !image->blue)
     {
         fprintf(stderr,"Failed to load %s\n",s);
@@ -317,26 +339,30 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
             unsigned char c;
             fread(&c,sizeof(unsigned char),1,fptr);
             image->red[i][j]=(int)c;
+            image->red_crop[i][j]=(int)c;
 
             unsigned char d;
             fread(&d,sizeof(unsigned char),1,fptr);
             image->green[i][j]=(int)d;
+            image->green_crop[i][j]=(int)d;
 
             unsigned char e;
             fread(&e,sizeof(unsigned char),1,fptr);
             image->blue[i][j]=(int)e;
+            image->blue_crop[i][j]=(int)e;
         }
     }
     fclose(fptr);
 
 }
-void file_printer_for_tests(int *type,struct global_image image)
+
+void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
 {   
-    char file[NMAX];
+    /*char file[NMAX];
     printf("Name output file: ");
     scanf("%s",file);
     printf("\nChoose type:");
-    scanf("%d",type);
+    scanf("%d",type);*/
     FILE *output=fopen(file,"wt");
     switch (*type)
     {
@@ -357,9 +383,6 @@ void file_printer_for_tests(int *type,struct global_image image)
         {
             for(int j=0; j<image.width; j++)
             {
-                //image.red[i][j]=255-image.red[i][j];
-                //image.green[i][j]=255-image.green[i][j];
-                //image.blue[i][j]=255-image.blue[i][j];
                 fprintf(output,"%d %d %d ",image.red[i][j],image.green[i][j],image.blue[i][j]);
             }
             fprintf(output,"\n");
@@ -400,7 +423,7 @@ void file_printer_for_tests(int *type,struct global_image image)
     fclose(output);
 }
 int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2,int *h1,int *h2,
-                        int *angle,char parametre[NMAX],struct global_image image)
+                        int *angle,char parametre[NMAX],char file[NMAX],int *type,struct global_image image)
 {
     char string[NMAX],copy_string[NMAX];
     fgets(string,NMAX,stdin);
@@ -411,6 +434,8 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     char *p=strtok(string," ");
 
     if(count==0 && strcmp(p,"LOAD")!=0) {
+        if(strcmp(p,"EXIT")==0)  return 10;
+        
         printf("No image loaded\n");
         return 0;
     }
@@ -431,6 +456,17 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     if(strcmp(p,"HISTOGRAM")==0) {
         return histogram_function_identifier(copy_string,image,h1,h2);
     }
+
+    /// crop 
+    if(strcmp(p,"CROP")==0) {
+        return 7;
+    }
+
+    /// save + we use save_function_identifier
+    if(strcmp(p,"SAVE")==0) {
+        return save_function_identifier(copy_string,file,type,image);
+    }
+
     /// exit
     if(strcmp(p,"EXIT")==0)
     {
@@ -519,4 +555,84 @@ int histogram_function_identifier(char string[NMAX],struct global_image image,in
     *h1=ch1;
     *h2=ch2;
     return 4;
+}
+
+int save_function_identifier(char string[NMAX],char file[NMAX],int *type,struct global_image image)
+{
+    int contor=0;
+    for(size_t i=0; i<strlen(string); i++)
+    {
+        if(string[i]==' ') contor++;
+    }
+    
+    char *p=strtok(string," ");
+    p=strtok(NULL," ");
+    strcpy(file,p);
+
+    *type=image.type[1]-'0';
+    if(contor==2) {
+        if(*type==5) {
+            *type=2;
+            return 9;
+        }
+        if(*type==6) {
+            *type=3;
+            return 9;
+        }
+        return 9;
+    }
+    else {
+        if(*type==2) {
+            *type=5;
+            return 9;
+        }
+        if(*type==3) {
+            *type=6;
+            return 9;
+        }
+        return 9;
+    }
+}
+// de vazut daca se face select dupa select sau se ia de pe matricea principala
+void select_function_integers(struct global_image *image,int x1,int x2,int y1,int y2)
+{
+    if(image->type[1]=='2' || image->type[1]=='5')
+    {
+        int **pointer=image->red_crop;
+        
+        image->red_crop=alloc_matrix(y2-y1,x2-x1);
+        if(!image->red_crop) {
+            fprintf(stderr,"Alloc failed\n");
+        }
+        
+        for(int i=y1; i<y2; i++)
+        {
+            for(int j=x1; j<x2; j++)
+            {
+                image->red_crop[i-y1][j-x1]=pointer[i][j];
+            }
+        }
+    }
+    if(image->type[1]=='3' || image->type[1]=='6')
+    {
+        free_matrix(image->height,image->red_crop);
+        free_matrix(image->height,image->green_crop);
+        free_matrix(image->height,image->blue_crop);
+        
+        image->red_crop=alloc_matrix(y2-y1,x2-x1);
+        image->red_crop=alloc_matrix(y2-y1,x2-x1);
+        image->red_crop=alloc_matrix(y2-y1,x2-x1);
+        if(!image->red_crop || !image->green_crop || ! image->blue_crop) {
+            fprintf(stderr,"Alloc failed\n");
+        }
+        for(int i=y1; i<y2; i++)
+        {
+            for(int j=x1; j<x2; j++)
+            {
+                image->red_crop[i-y1][j-x1]=image->red[i][j];
+                image->green_crop[i-y1][j-x1]=image->green[i][j];
+                image->blue_crop[i-y1][j-x1]=image->blue[i][j];
+            }
+        }
+    }
 }

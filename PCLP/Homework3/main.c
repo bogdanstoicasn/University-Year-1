@@ -18,36 +18,41 @@ struct global_image
     int **blue_crop;
 };
 int main() {
-    char s[NMAX],parameter[NMAX];
+    char s[NMAX],parameter[NMAX],file[NMAX];
     struct global_image image;
-    int type_determine,type,x1,x2,y1,y2,h1=0,h2=0,angle=0,count=0;
+    int type_determine=0,type,x1,x2,y1,y2,h1=0,h2=0,angle=0,count=0;
     FILE *fptr=NULL;
     while(1) {
-        int oppp=operation_identifier(count,s,&x1,&y1,&x2,&y2,&h1,&h2,&angle,parameter,image);
+        int oppp=operation_identifier(count,s,&x1,&y1,&x2,&y2,&h1,&h2,&angle,parameter,file,&type,image);
         switch(oppp) {
             case 1: 
             {
+                int aux=type_determine;
                 type_determine=file_type(fptr,s);
                 if(type_determine!=0) {
                 file_reader_first_version(&count,s,type_determine,fptr,&image);
                 }
+                else type_determine=aux;
+                printf("%d ",type_determine);
                 break;
             }
-            case 2:
-                printf("%d %d %d %d\n",x1,y1,x2,y2);
+            case 2://idk
+                select_function(&image,x1,x2,y1,y2);
                 break;
-            case 3:
+            case 3://lasi selectul anterior ca nu deranjaza
                 printf("ALLLLLL\n");
                 break;
             case 4:
                 printf("%d-%d-Histogram\n",h1,h2);
                 break;
+            case 9:///works
+                file_printer_for_tests(&type,file,image);
+                break;
             case 10:
-                file_printer_for_tests(&type,image);
                 free_global_matrix(type_determine,&image);
                 break;
             default:
-                printf("one operation no good param\n");
+                ///printf("one operation no good param\n");
                 break;
         }
         if(oppp==10) break;
