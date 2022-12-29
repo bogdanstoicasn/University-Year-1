@@ -17,31 +17,19 @@ struct global_image
     int **green_crop;
     int **blue_crop;
 };
-int main()
-{
+int main() {
     char s[NMAX],parameter[NMAX];
     struct global_image image;
     int type_determine,type,x1,x2,y1,y2,h1=0,h2=0,angle=0,count=0;
     FILE *fptr=NULL;
-    while(1)
-    {
-        int oppp=operation_identifier(s,&x1,&y1,&x2,&y2,&h1,&h2,&angle,parameter,image);
-        switch(oppp)
-        {
-            case 1:
+    while(1) {
+        int oppp=operation_identifier(count,s,&x1,&y1,&x2,&y2,&h1,&h2,&angle,parameter,image);
+        switch(oppp) {
+            case 1: 
             {
-                if(count!=0)
-                {
-                    free_global_matrix(type_determine,&image);
-                    type_determine=file_type(fptr,s);
-                    file_reader_first_version(s,type_determine,fptr,&image);
-                }
-                else{
-                    type_determine=file_type(fptr,s);
-                    if(type_determine!=0) {
-                        count=1;
-                        file_reader_first_version(s,type_determine,fptr,&image);
-                    }
+                type_determine=file_type(fptr,s);
+                if(type_determine!=0) {
+                file_reader_first_version(&count,s,type_determine,fptr,&image);
                 }
                 break;
             }
@@ -64,6 +52,6 @@ int main()
         }
         if(oppp==10) break;
     }
-    //free_global_matrix(type_determine,&image);
+    printf("%d",count);
     return 0;
 }
