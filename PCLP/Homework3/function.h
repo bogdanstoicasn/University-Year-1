@@ -19,3 +19,5 @@ int select_function_identifier(char string[NMAX],struct global_image image,int *
 int histogram_function_identifier(char string[NMAX],struct global_image image,int *h1,int *h2);
 int save_function_identifier(char string[NMAX],char file[NMAX],int *type,struct global_image image);
 void select_function_integers(struct global_image *image,int x1,int x2,int y1,int y2);
+void select_function_all(struct global_image *image);
+void crop_function(struct global_image *image);

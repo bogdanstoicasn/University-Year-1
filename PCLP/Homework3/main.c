@@ -7,15 +7,10 @@
 struct global_image
 {
     char type[3];
-    int width;
-    int height;
-    int maxValue;
-    int **red;
-    int **green;
-    int **blue;
-    int **red_crop;
-    int **green_crop;
-    int **blue_crop;
+    int width,height,maxValue,x_axis,y_axis;
+    int **red,**red_crop;
+    int **green,**green_crop;
+    int **blue,**blue_crop;
 };
 int main() {
     char s[NMAX],parameter[NMAX],file[NMAX];
@@ -33,17 +28,33 @@ int main() {
                 file_reader_first_version(&count,s,type_determine,fptr,&image);
                 }
                 else type_determine=aux;
-                printf("%d ",type_determine);
+                printf("%d\n",type_determine);
                 break;
             }
-            case 2://idk
-                select_function(&image,x1,x2,y1,y2);
+            case 2://idk, it works
+                select_function_integers(&image,x1,x2,y1,y2);
+                printf("\n");
+                for(int i=0; i<image.y_axis;i++)
+                {
+                    for(int j=0; j<image.x_axis; j++)
+                        printf("%d ",image.red_crop[i][j]);
+                    printf("\n");
+                }
                 break;
             case 3://lasi selectul anterior ca nu deranjaza
-                printf("ALLLLLL\n");
+                select_function_all(&image);
+                for(int i=0; i<image.y_axis/50;i++)
+                {
+                    for(int j=0; j<image.x_axis/50; j++)
+                        printf("%d ",image.red_crop[i][j]);
+                    printf("\n");
+                }
                 break;
             case 4:
                 printf("%d-%d-Histogram\n",h1,h2);
+                break;
+            case 7:
+                crop_function(&image);
                 break;
             case 9:///works
                 file_printer_for_tests(&type,file,image);
