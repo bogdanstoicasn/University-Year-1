@@ -21,3 +21,10 @@ int save_function_identifier(char string[NMAX],char file[NMAX],int *type,struct 
 void select_function_integers(struct global_image *image,int x1,int x2,int y1,int y2);
 void select_function_all(struct global_image *image);
 void crop_function(struct global_image *image);
+
+
+void counter_clockwise_rotation_90(struct global_image *image);
+void clockwise_rotation_90(struct global_image *image);
+void rotate_function_helper(struct global_image *image,int angle);
+
+void histogram_function(struct global_image image,int h1_star,int h2_bins);

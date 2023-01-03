@@ -19,6 +19,7 @@ int max_of_numbers(int a,int b)
     if(a>b) return a;
     else return b;
 }
+
 void swap_function(int* a,int* b)
 {
     if(*a>*b){
@@ -27,6 +28,7 @@ void swap_function(int* a,int* b)
         *b=aux;
     }
 }
+
 void ignore_comments(FILE* fp)
 {
     int ch;
@@ -47,6 +49,7 @@ void ignore_comments(FILE* fp)
     else
         fseek(fp, -1, SEEK_CUR);
 }///se aplica  dupa fiecre citire
+
 int **alloc_matrix(int line, int coloumn) {
 	int **a = (int **)malloc(line * sizeof(int *)); 
     if (!a) {
@@ -66,6 +69,7 @@ int **alloc_matrix(int line, int coloumn) {
 	}
 	return a;
 }
+
 void free_matrix(int line,int **matrix) {
     for (int i = 0; i < line; i++) {
 		free(matrix[i]);
@@ -112,6 +116,7 @@ void free_global_matrix(int type,struct global_image* image)
             break;
     }
 }
+
 void print_matrix(struct global_image element) {
         for(int i=0; i<element.height; i++) {
             for(int j=0; j<element.width; j++) {
@@ -120,6 +125,7 @@ void print_matrix(struct global_image element) {
             printf("\n");
         }  
 }
+
 /// discovers the photo type
 /// working as intended
 int file_type(FILE *fptr,char s[NMAX])
@@ -162,6 +168,7 @@ int file_type(FILE *fptr,char s[NMAX])
     }
     return 0;
 }
+
 void file_reader_first_version(int *count,char s[NMAX],int type,FILE *fptr,struct global_image* image)
 {
     if(*count!=0) {
@@ -188,6 +195,7 @@ void file_reader_first_version(int *count,char s[NMAX],int type,FILE *fptr,struc
     }
     (*count)=1;
 }
+
 /// reads PGM files in ascii format 
 void text_file_reader_pgm_edition(char s[NMAX],FILE *fptr,struct global_image* image)
 {
@@ -420,6 +428,7 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
     }
     fclose(output);
 }
+
 int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2,int *h1,int *h2,
                         int *angle,char parametre[NMAX],char file[NMAX],int *type,struct global_image image)
 {
@@ -455,6 +464,11 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
         return histogram_function_identifier(copy_string,image,h1,h2);
     }
 
+    if(strcmp(p,"ROTATE")==0) {
+        p=strtok(NULL," ");
+        *angle=atoi(p);
+        return 6;
+    }
     /// crop 
     if(strcmp(p,"CROP")==0) {
         return 7;
@@ -472,6 +486,7 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     }
     return 0;
 }
+
 int select_function_identifier(char string[NMAX],struct global_image image,int *x1,int *y1,int *x2,int *y2)
 {
     char *p=strtok(string," ");
@@ -521,6 +536,7 @@ int select_function_identifier(char string[NMAX],struct global_image image,int *
     }
     return 0;
 }
+
 int histogram_function_identifier(char string[NMAX],struct global_image image,int *h1,int *h2)
 {
     if(image.type[1]=='3' || image.type[1]=='6') {
@@ -591,6 +607,7 @@ int save_function_identifier(char string[NMAX],char file[NMAX],int *type,struct 
         return 9;
     }
 }
+
 // de vazut daca se face select dupa select sau se ia de pe matricea principala
 void select_function_integers(struct global_image *image,int x1,int x2,int y1,int y2)
 {
@@ -774,5 +791,202 @@ void crop_function(struct global_image *image)
         image->height=image->y_axis;
 
         printf("Image cropped\n");
+    }
+}
+
+void rotate_function_helper(struct global_image *image,int angle)
+{
+    if(image->x_axis!=image->y_axis) printf("The selection must be square\n");
+    switch(angle)
+    {
+        case 90:
+            clockwise_rotation_90(image);
+            break;
+        case -90:
+            counter_clockwise_rotation_90(image);
+            break;
+        case 180:
+            clockwise_rotation_90(image);
+            clockwise_rotation_90(image);
+            break;
+        case -180:
+            counter_clockwise_rotation_90(image);
+            counter_clockwise_rotation_90(image);
+            break;
+        case 270:
+            counter_clockwise_rotation_90(image);
+            break;
+        case -270:
+            clockwise_rotation_90(image);
+        case 360:
+            break;
+        case -360:
+            break;
+        default:
+            printf("Unsupported rotation angle\n");
+            break;
+    }
+}
+
+void counter_clockwise_rotation_90(struct global_image *image)
+{
+    if(image->type[1]=='2' || image->type[1]=='5') {
+        // Consider all squares one by one
+        for (int x = 0; x < image->y_axis / 2; x++) {
+            // Consider elements in group
+            // of 4 in current square
+            for (int y = x; y < image->x_axis - x - 1; y++) {
+                // Store current cell in
+                // temp variable
+                int temp = image->red_crop[x][y];
+    
+                // Move values from right to top
+                image->red_crop[x][y] =image->red_crop[y][image->y_axis - 1 - x];
+    
+                // Move values from bottom to right
+                image->red_crop[y][image->x_axis - 1 - x] = image->red_crop[image->x_axis - 1 - x][image->x_axis - 1 - y];
+    
+                // Move values from left to bottom
+                image->red_crop[image->x_axis - 1 - x][image->x_axis - 1 - y] = image->red_crop[image->x_axis - 1 - y][x];
+    
+                // Assign temp to left
+                image->red_crop[image->x_axis - 1 - y][x] = temp;
+            }
+        }
+    }
+
+    if(image->type[1]=='3' || image->type[1]=='6') {
+        // Consider all squares one by one
+        for (int x = 0; x < image->y_axis / 2; x++) {
+            // Consider elements in group
+            // of 4 in current square
+            for (int y = x; y < image->x_axis - x - 1; y++) {
+                // Store current cell in
+                // temp variable
+                int temp = image->red_crop[x][y];
+    
+                // Move values from right to top
+                image->red_crop[x][y] =image->red_crop[y][image->y_axis - 1 - x];
+    
+                // Move values from bottom to right
+                image->red_crop[y][image->x_axis - 1 - x] = image->red_crop[image->x_axis - 1 - x][image->x_axis - 1 - y];
+    
+                // Move values from left to bottom
+                image->red_crop[image->x_axis - 1 - x][image->x_axis - 1 - y] = image->red_crop[image->x_axis - 1 - y][x];
+    
+                // Assign temp to left
+                image->red_crop[image->x_axis - 1 - y][x] = temp;
+
+                // repeat for green
+                temp = image->green_crop[x][y];
+
+                image->green_crop[x][y] =image->green_crop[y][image->y_axis - 1 - x];
+    
+                image->green_crop[y][image->x_axis - 1 - x] = image->green_crop[image->x_axis - 1 - x][image->x_axis - 1 - y];
+    
+                image->green_crop[image->x_axis - 1 - x][image->x_axis - 1 - y] = image->green_crop[image->x_axis - 1 - y][x];
+    
+                image->green_crop[image->x_axis - 1 - y][x] = temp;
+
+                // repeat for blue
+                temp = image->blue_crop[x][y];
+
+                image->blue_crop[x][y] =image->blue_crop[y][image->y_axis - 1 - x];
+    
+                image->blue_crop[y][image->x_axis - 1 - x] = image->blue_crop[image->x_axis - 1 - x][image->x_axis - 1 - y];
+    
+                image->blue_crop[image->x_axis - 1 - x][image->x_axis - 1 - y] = image->blue_crop[image->x_axis - 1 - y][x];
+
+                image->blue_crop[image->x_axis - 1 - y][x] = temp;                
+            }
+        }
+    }
+}
+
+void clockwise_rotation_90(struct global_image *image)
+{
+ 
+    if(image->type[1]=='2' || image->type[1]=='5') {
+        for (int i = 0; i < image->x_axis / 2; i++) {
+            for (int j = i; j < image->x_axis - i - 1; j++) {
+            
+                // Swap elements of each cycle
+                // in clockwise direction
+                int temp = image->red_crop[i][j];
+                image->red_crop[i][j] = image->red_crop[image->x_axis - 1 - j][i];
+                image->red_crop[image->x_axis - 1 - j][i] = image->red_crop[image->x_axis - 1 - i][image->x_axis - 1 - j];
+                image->red_crop[image->x_axis - 1 - i][image->x_axis - 1 - j] = image->red_crop[j][image->x_axis - 1 - i];
+                image->red_crop[j][image->x_axis - 1 - i] = temp;
+            }
+        }
+    }
+
+    if(image->type[1]=='3' || image->type[1]=='6') {
+        for (int i = 0; i < image->x_axis / 2; i++) {
+            for (int j = i; j < image->x_axis - i - 1; j++) {
+            
+                // Swap elements of each cycle
+                // in clockwise direction
+                int temp = image->red_crop[i][j];
+                image->red_crop[i][j] = image->red_crop[image->x_axis - 1 - j][i];
+                image->red_crop[image->x_axis - 1 - j][i] = image->red_crop[image->x_axis - 1 - i][image->x_axis - 1 - j];
+                image->red_crop[image->x_axis - 1 - i][image->x_axis - 1 - j] = image->red_crop[j][image->x_axis - 1 - i];
+                image->red_crop[j][image->x_axis - 1 - i] = temp;
+
+                temp = image->green_crop[i][j];
+                image->green_crop[i][j] = image->green_crop[image->x_axis - 1 - j][i];
+                image->green_crop[image->x_axis - 1 - j][i] = image->green_crop[image->x_axis - 1 - i][image->x_axis - 1 - j];
+                image->green_crop[image->x_axis - 1 - i][image->x_axis - 1 - j] = image->green_crop[j][image->x_axis - 1 - i];
+                image->green_crop[j][image->x_axis - 1 - i] = temp;
+
+                temp = image->blue_crop[i][j];
+                image->blue_crop[i][j] = image->blue_crop[image->x_axis - 1 - j][i];
+                image->blue_crop[image->x_axis - 1 - j][i] = image->blue_crop[image->x_axis - 1 - i][image->x_axis - 1 - j];
+                image->blue_crop[image->x_axis - 1 - i][image->x_axis - 1 - j] = image->blue_crop[j][image->x_axis - 1 - i];
+                image->blue_crop[j][image->x_axis - 1 - i] = temp;
+            }
+        }
+    }
+}
+
+
+
+void histogram_function(struct global_image image,int h1_star,int h2_bins)
+{
+    int i,j,*histogram_map=NULL,max_frequency=0;
+    if(image.type[1]=='3' || image.type[1]=='6') {
+        printf("Black and white image needed\n");
+        return ;
+    }
+    
+    if(h2_bins<2 || h2_bins>256 || (h2_bins&(h2_bins-1))!=0 ) {
+        printf("Invalid set of parameters\n");
+        return ;
+    }
+    
+    if(image.type[1]=='2' || image.type[1]=='5') {
+        histogram_map=calloc(h2_bins,sizeof(int));
+        if(!histogram_map) {
+            //free_global_matrix(2,&image);
+            printf("Alloc failed\n");
+            return ;
+        }
+
+        int step=(image.maxValue+1)/h2_bins;
+        for(i=0; i<image.height; i++)
+            for(j=0; j<image.width; j++)
+                histogram_map[image.red[i][j]/step]++;
+
+        for(i=0; i<h2_bins; i++)
+            if(histogram_map[i]>max_frequency) max_frequency=histogram_map[i];
+        
+        for(i=0; i<h2_bins; i++) {
+            double length_of_star=(histogram_map[i]*(1.0)/max_frequency)*h1_star;
+            printf("%d\t|\t",(int)length_of_star);
+            for(j=0; j<=(int)length_of_star; j++)
+                printf("*");
+            printf("\n");
+        }
+        free(histogram_map);
     }
 }

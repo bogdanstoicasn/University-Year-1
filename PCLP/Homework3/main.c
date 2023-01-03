@@ -15,10 +15,10 @@ struct global_image
 int main() {
     char s[NMAX],parameter[NMAX],file[NMAX];
     struct global_image image;
-    int type_determine=0,type,x1,x2,y1,y2,h1=0,h2=0,angle=0,count=0;
+    int type_determine=0,type,x1,x2,y1,y2,h1_stars=0,h2_bins=0,angle=0,count=0;
     FILE *fptr=NULL;
     while(1) {
-        int oppp=operation_identifier(count,s,&x1,&y1,&x2,&y2,&h1,&h2,&angle,parameter,file,&type,image);
+        int oppp=operation_identifier(count,s,&x1,&y1,&x2,&y2,&h1_stars,&h2_bins,&angle,parameter,file,&type,image);
         switch(oppp) {
             case 1: 
             {
@@ -34,24 +34,17 @@ int main() {
             case 2://idk, it works
                 select_function_integers(&image,x1,x2,y1,y2);
                 printf("\n");
-                for(int i=0; i<image.y_axis;i++)
-                {
-                    for(int j=0; j<image.x_axis; j++)
-                        printf("%d ",image.red_crop[i][j]);
-                    printf("\n");
-                }
                 break;
             case 3://lasi selectul anterior ca nu deranjaza
                 select_function_all(&image);
-                for(int i=0; i<image.y_axis/50;i++)
-                {
-                    for(int j=0; j<image.x_axis/50; j++)
-                        printf("%d ",image.red_crop[i][j]);
-                    printf("\n");
-                }
                 break;
             case 4:
-                printf("%d-%d-Histogram\n",h1,h2);
+                printf("%d-%d-Histogram\n",h1_stars,h2_bins);
+                histogram_function(image,h1_stars,h2_bins);
+                break;
+            case 6:
+                printf("ANGLE == %d \n",angle);
+                rotate_function_helper(&image,angle);
                 break;
             case 7:
                 crop_function(&image);
@@ -63,7 +56,7 @@ int main() {
                 free_global_matrix(type_determine,&image);
                 break;
             default:
-                ///printf("one operation no good param\n");
+                printf("Invalid command\n");
                 break;
         }
         if(oppp==10) break;
