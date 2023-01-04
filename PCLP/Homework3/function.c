@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <math.h>
 #include "function.h"
 #include <string.h>
 #define NMAX 30
@@ -231,6 +232,7 @@ void text_file_reader_pgm_edition(char s[NMAX],FILE *fptr,struct global_image* i
             image->red_crop[i][j]=x;
         }
     }
+    printf("Loaded %s\n",s);
     fclose(fptr);
 }
 /// reads PPM files in ascii format
@@ -276,6 +278,7 @@ void text_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image* i
             image->blue_crop[i][j]=z;
         }
     }
+    printf("Loaded %s\n",s);
     fclose(fptr);
 }
 /// reads PGM files in binary format
@@ -312,6 +315,7 @@ void binary_file_reader_pgm_edition(char s[NMAX],FILE *fptr, struct global_image
             image->red_crop[i][j]=(int)c;
         }
     }
+    printf("Loaded %s\n",s);
     fclose(fptr);
 }
 /// reads PPM files in binary format
@@ -363,6 +367,7 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
             image->blue_crop[i][j]=(int)e;
         }
     }
+    printf("Loaded %s\n",s);
     fclose(fptr);
 
 }
@@ -382,6 +387,8 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
             }
             fprintf(output,"\n");
         }
+
+        printf("Saved %s\n",file);
         break;
     case 3:
         fprintf(output,"P3\n%d %d\n%d\n",image.width,image.height,image.maxValue);
@@ -393,6 +400,8 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
             }
             fprintf(output,"\n");
         }
+
+        printf("Saved %s\n",file);
         break;
     case 5:
         fprintf(output,"P5\n%d %d\n%d\n",image.width,image.height,image.maxValue);
@@ -404,6 +413,8 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
                 fwrite(&c,sizeof(unsigned char),1,output);
             }
         }
+
+        printf("Saved %s\n",file);
         break;
     case 6:
         fprintf(output,"P6\n%d %d\n%d\n",image.width,image.height,image.maxValue);
@@ -421,6 +432,8 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
                 fwrite(&e,sizeof(unsigned char),1,output);
             }
         }
+
+        printf("Saved %s\n",file);
         break;
     default:
         printf("not ppm or pgm\n");
@@ -440,42 +453,48 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     
     char *p=strtok(string," ");
 
-    if(count==0 && strcmp(p,"LOAD")!=0) {
+    /*if(count==0 && strcmp(p,"LOAD")!=0) {
         if(strcmp(p,"EXIT")==0)  return 10;
-        
         printf("No image loaded\n");
         return 0;
-    }
+    }*/
 
     ///load
     if(strcmp(p,"LOAD")==0){
-        p=strtok(NULL," ");
-        strcpy(s,p);
-        return 1;
+        return load_function_identifier(copy_string,s);
     }
 
     /// select + we use select_function_identifier
     if(strcmp(p,"SELECT")==0) {
-        return select_function_identifier(copy_string,image,x1,y1,x2,y2);
+        return select_function_identifier(count,copy_string,image,x1,y1,x2,y2);
     }
 
     ///histogram + we use histogram_function_identifier
     if(strcmp(p,"HISTOGRAM")==0) {
-        return histogram_function_identifier(copy_string,image,h1,h2);
+        return histogram_function_identifier(count,copy_string,image,h1,h2);
     }
 
     if(strcmp(p,"ROTATE")==0) {
-        p=strtok(NULL," ");
-        *angle=atoi(p);
-        return 6;
+        return rotate_function_identifier(count,copy_string,image,angle);
     }
+
+    if(strcmp(p,"EQUALIZE")==0) {
+        return equalize_function_identifier(count,image);
+    }
+
     /// crop 
     if(strcmp(p,"CROP")==0) {
+        if(count==0) return 11;
         return 7;
+    }
+
+    if(strcmp(p,"APPLY")==0) {
+        return apply_function_identifier(count,copy_string,parametre,image);
     }
 
     /// save + we use save_function_identifier
     if(strcmp(p,"SAVE")==0) {
+        if(count==0) return 11;
         return save_function_identifier(copy_string,file,type,image);
     }
 
@@ -484,16 +503,38 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     {
         return 10;
     }
+
+    printf("Invalid command\n");
     return 0;
 }
 
-int select_function_identifier(char string[NMAX],struct global_image image,int *x1,int *y1,int *x2,int *y2)
+int load_function_identifier(char string[NMAX],char s[NMAX])
 {
     char *p=strtok(string," ");
-    int contor=0,cpx1=-1,cpx2=-1,cpy1=-1,cpy2=-1;
+    int ok=0;
     while(p)
     {
-        if(p[0]>='A' && p[0]<='Z') ; 
+        ok++;
+        if(ok==2) strcpy(s,p);
+        p=strtok(NULL," ");
+    }
+    if(ok==1 || ok>=3) {
+        printf("Invalid command\n");
+        return 0;
+    }
+    return 1;
+}
+
+int select_function_identifier(int count,char string[NMAX],struct global_image image,int *x1,int *y1,int *x2,int *y2)
+{
+    char *p=strtok(string," ");
+    int contor=0,cpx1=-1,cpx2=-1,cpy1=-1,cpy2=-1,ok=0;
+    while(p)
+    {
+        if(p[0]>='A' && p[0]<='Z') {
+            if(strcmp(p,"ALL")==0) ok=1;
+            else ok--;
+        }
         else
         {
         if(contor==0)
@@ -516,14 +557,25 @@ int select_function_identifier(char string[NMAX],struct global_image image,int *
         }
         p = strtok(NULL," ");
     }
-    if(contor == 0) return 3;
+    if(ok==1 && contor==0) {
+        if(count==0) {
+            return 11;
+        }
+        return 3;
+    }
     
     if(contor ==4) {
+        if(count==0) return 11;
+
         if(max_of_numbers(cpx1,cpx2)>image.width) {
             printf("Invalid coordinates\n");
             return 0;
         }
         if(max_of_numbers(cpy1,cpy2)>image.height) {
+            printf("Invalid coordinates\n");
+            return 0;
+        }
+        if(cpx1==cpx2 || cpy1==cpy2) {
             printf("Invalid coordinates\n");
             return 0;
         }
@@ -534,15 +586,15 @@ int select_function_identifier(char string[NMAX],struct global_image image,int *
         
         return 2;
     }
+    if(contor!=3 || ok!=0) {
+        printf("Invalid command\n");
+        return 0;
+    }
     return 0;
 }
 
-int histogram_function_identifier(char string[NMAX],struct global_image image,int *h1,int *h2)
+int histogram_function_identifier(int count,char string[NMAX],struct global_image image,int *h1,int *h2)
 {
-    if(image.type[1]=='3' || image.type[1]=='6') {
-        printf("Black and white image needed\n");
-        return 0;
-    }
 
     char *p=strtok(string," ");
     int contor=0,ch1=-1,ch2=-1;
@@ -564,8 +616,22 @@ int histogram_function_identifier(char string[NMAX],struct global_image image,in
     p = strtok(NULL," ");
     }
     
-    if(ch1==-1 || ch2==-1) return 0;
+    if(ch1==-1 || ch2==-1) {
+        printf("Invalid command\n");
+        return 0;
+    }
 
+    if(count == 0) 
+        return 11;
+
+    if(image.type[1]=='3' || image.type[1]=='6') {
+        printf("Black and white image needed\n");
+        return 0;
+    }
+    if(ch2<2 || ch2>256 || (ch2&(ch2-1))!=0) {
+        printf("Invalid set of parameters\n");
+        return 0;
+    }
     *h1=ch1;
     *h2=ch2;
     return 4;
@@ -608,6 +674,32 @@ int save_function_identifier(char string[NMAX],char file[NMAX],int *type,struct 
     }
 }
 
+int rotate_function_identifier(int count,char string[NMAX],struct global_image image,int *angle)
+{
+    char *p=strtok(string," ");
+    p=strtok(NULL," ");
+    int copy_angle=-1;
+    while(p)
+    {
+        copy_angle=atoi(p);
+        p=strtok(NULL," ");
+    }
+    if(copy_angle==-1) {
+        printf("Invalid command\n");
+        return 0;
+    }
+
+    if(count==0) 
+        return 11;
+
+    if(image.x_axis!=image.y_axis) {
+        printf("The selection must be square\n");
+        return 0;
+    }
+
+    *angle=copy_angle;
+    return 6;
+}
 // de vazut daca se face select dupa select sau se ia de pe matricea principala
 void select_function_integers(struct global_image *image,int x1,int x2,int y1,int y2)
 {
@@ -670,7 +762,7 @@ void select_function_integers(struct global_image *image,int x1,int x2,int y1,in
     }
 }
 
-void select_function_all(struct global_image *image)
+void select_function_all(struct global_image *image,int *x1,int *y1,int *x2,int *y2)
 {
     if(image->type[1]=='2' || image->type[1]=='5')
     {
@@ -688,6 +780,9 @@ void select_function_all(struct global_image *image)
 
         image->x_axis=image->width;
         image->y_axis=image->height;
+
+        *x1=*y1=0; *x2=image->width; *y2=image->height;
+
         printf("Selected ALL\n");
 
     }
@@ -726,6 +821,9 @@ void select_function_all(struct global_image *image)
 
         image->x_axis=image->width;
         image->y_axis=image->height;
+
+        *x1=*y1=0; *x2=image->width; *y2=image->height;
+
         printf("Selected ALL\n");
     }
 }
@@ -796,7 +894,7 @@ void crop_function(struct global_image *image)
 
 void rotate_function_helper(struct global_image *image,int angle)
 {
-    if(image->x_axis!=image->y_axis) printf("The selection must be square\n");
+    //if(image->x_axis!=image->y_axis) {printf("The selection must be square\n");return ;}
     switch(angle)
     {
         case 90:
@@ -950,43 +1048,156 @@ void clockwise_rotation_90(struct global_image *image)
 }
 
 
-
 void histogram_function(struct global_image image,int h1_star,int h2_bins)
 {
-    int i,j,*histogram_map=NULL,max_frequency=0;
+    int i,j;
+    long long *histogram_map=NULL,max_frequency=0;
+    histogram_map=calloc(h2_bins,sizeof(long long));
+    if(!histogram_map) {
+        //free_global_matrix(2,&image);
+        printf("Alloc failed\n");
+        return ;
+    }
+    int step=(image.maxValue+1)/h2_bins;
+    for(i=0; i<image.height; i++)
+        for(j=0; j<image.width; j++)
+            histogram_map[image.red[i][j]/step]++;
+    for(i=0; i<h2_bins; i++)
+        if(histogram_map[i]>max_frequency) max_frequency=histogram_map[i];
+    
+    for(i=0; i<h2_bins; i++) {
+        double length_of_star=(histogram_map[i]*(1.0)/max_frequency)*h1_star;
+        printf("%d\t|\t",(int)length_of_star);
+        for(j=0; j<(int)length_of_star; j++)
+            printf("*");
+        printf("\n");
+    }
+    free(histogram_map);
+}
+
+int equalize_function_identifier(int count,struct global_image image)
+{
+    if(count == 0) {
+        return 11;
+    }
     if(image.type[1]=='3' || image.type[1]=='6') {
         printf("Black and white image needed\n");
+        return 0;
+    }
+    return 5;
+}
+
+void equalize_function(struct global_image *image)
+{
+    int *frequency=calloc(257,sizeof(int));
+    if(!frequency) {
+        printf("Alloc failed\n");
         return ;
     }
+    for(int i=0; i<image->height; i++)
+        for(int j=0; j<image->width; j++)
+            frequency[(image->red[i][j])]++;
     
-    if(h2_bins<2 || h2_bins>256 || (h2_bins&(h2_bins-1))!=0 ) {
-        printf("Invalid set of parameters\n");
-        return ;
+
+    for(int i=0; i<image->height; i++)
+    {
+        for(int j=0; j<image->width; j++)
+        {
+            double sum=0;
+            for(int k=0; k<image->red[i][j]; k++)
+                sum+=frequency[k];
+            
+            double final_result,area;
+            area=image->width*image->height;
+            final_result=sum*(1.0)*255/area;
+            image->red[i][j]= round(final_result);
+            if(image->red[i][j]>255) image->red[i][j]=255;
+            if(image->red[i][j]<0) image->red[i][j]=0;
+        }
     }
-    
-    if(image.type[1]=='2' || image.type[1]=='5') {
-        histogram_map=calloc(h2_bins,sizeof(int));
-        if(!histogram_map) {
-            //free_global_matrix(2,&image);
-            printf("Alloc failed\n");
-            return ;
+    free(frequency);
+    printf("Equalize done\n");
+}
+
+int apply_function_identifier(int count,char string[NMAX],char parameter[NMAX],struct global_image image)
+{
+    if(count==0) {
+        return 11;
+    }
+    char *p=strtok(string," ");
+    int ok=0;
+    while(p)
+    {
+        ok++;
+        if(ok==2) strcpy(parameter,p);
+        p=strtok(NULL," ");
+    }
+
+    if(ok==1 || ok>=3) {
+        printf("Invalid command\n");
+        return 0;
+    }
+    if(strcmp(parameter,"EDGE")==0 || strcmp(parameter,"SHARPEN")==0 || strcmp(parameter,"BLUR")==0 || strcmp(parameter,"GAUSSIAN_BLUR")==0) {
+       
+        if(image.type[1]=='2' || image.type[1]=='5') {
+            printf("Easy, Charlie Chaplin\n");
+            return 0;
         }
 
-        int step=(image.maxValue+1)/h2_bins;
-        for(i=0; i<image.height; i++)
-            for(j=0; j<image.width; j++)
-                histogram_map[image.red[i][j]/step]++;
-
-        for(i=0; i<h2_bins; i++)
-            if(histogram_map[i]>max_frequency) max_frequency=histogram_map[i];
-        
-        for(i=0; i<h2_bins; i++) {
-            double length_of_star=(histogram_map[i]*(1.0)/max_frequency)*h1_star;
-            printf("%d\t|\t",(int)length_of_star);
-            for(j=0; j<=(int)length_of_star; j++)
-                printf("*");
-            printf("\n");
-        }
-        free(histogram_map);
+        return 8;
     }
+    else {
+        printf("APPLY parameter invalid\n");
+        return 0;
+    }
+
+
+    return 8;
+}
+
+int **kernel_matrixes_creator(char parameter[NMAX])
+{
+    int i,j;
+	int **kernel=alloc_matrix(3,3);
+
+    if(!kernel) {
+        printf("Alloc failed");
+        return NULL;
+    }
+
+
+    if(strcmp(parameter,"EDGE")==0) {
+        for(i=0; i<3; i++)
+			for(j=0; j<=i; j++)
+				kernel[i][j]=kernel[j][i]=-1;
+		kernel[1][1]=8;
+    }
+
+    if(strcmp(parameter,"SHARPEN")==0) {
+        for(i=0; i<3; i++)
+			for(j=0; j<=i; j++)
+				if((i+j)%2==0)
+					kernel[i][j]=kernel[j][i]=0;
+				else
+					kernel[i][j]=kernel[j][i]=-1;
+		kernel[1][1]=5;
+    }
+
+    if(strcmp(parameter,"BLUR")==0) {
+        for(i=0; i<3; i++)
+			for(j=0; j<=i; j++)
+				kernel[i][j]=kernel[j][i]=1;
+    }
+
+    if(strcmp(parameter,"GAUSSIAN_BLUR")==0) {
+        for(i=0; i<3; i++)
+			for(j=0; j<=i; j++)
+				if((i+j)%2==0)
+					kernel[i][j]=kernel[j][i]=1;
+				else
+					kernel[i][j]=kernel[j][i]=2;
+		kernel[1][1]=4;
+    }
+	
+	return kernel;
 }

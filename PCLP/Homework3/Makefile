@@ -10,15 +10,15 @@ OBJ = function.o main.o
 
 #build program -- same as: gcc function.o main.o -o 
 build: function main
-	$(CC) $(OBJ) -o ./$(OUT)
+	$(CC) $(OBJ) -o ./$(OUT) -lm
 
 # function compilation -- same as: gcc --Wall -Wextra -c function.h function.c 
 function: function.h function.c
-	$(CC) $(CFLAGS) -c $@.c
+	$(CC) $(CFLAGS) -c $@.c -lm
 
 # main function compilation -- same as: gcc --Wall -Wextra -c main.c 
 main: main.c
-	$(CC) $(CFLAGS) -c $@.c
+	$(CC) $(CFLAGS) -c $@.c -lm
 
 #run
 run: build
