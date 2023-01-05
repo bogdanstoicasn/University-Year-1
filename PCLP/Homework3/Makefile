@@ -1,7 +1,7 @@
 ####Copyright 2022-2023 Stoica Bogdan (bogdanstoicasn@yahoo.com)
 # compilator
 CC = gcc
-OUT=test
+OUT=image_editor
 # flags for warnings
 CFLAGS = -Wall -Wextra -std=c99
 

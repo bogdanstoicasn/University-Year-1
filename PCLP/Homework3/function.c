@@ -4,7 +4,9 @@
 #include <math.h>
 #include "function.h"
 #include <string.h>
+
 #define NMAX 30
+
 struct global_image
 {
     char type[3];
@@ -151,20 +153,16 @@ int file_type(FILE *fptr,char s[NMAX])
     switch(determine_type[1])
     {
         case '2':
-            fseek(fptr,0,0);
-            fclose(fptr);
+            
             return 2;
         case '3':
-            fseek(fptr,0,0);
-            fclose(fptr);
+           
             return 3;
         case '5':
-            fseek(fptr,0,0);
-            fclose(fptr);
+            
             return 5;
         case '6':
-            fseek(fptr,0,0);
-            fclose(fptr);
+            
             return 6;
     }
     return 0;
@@ -385,7 +383,6 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
             {
                 fprintf(output,"%d ",image.red[i][j]);
             }
-            fprintf(output,"\n");
         }
 
         printf("Saved %s\n",file);
@@ -398,7 +395,6 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
             {
                 fprintf(output,"%d %d %d ",image.red[i][j],image.green[i][j],image.blue[i][j]);
             }
-            fprintf(output,"\n");
         }
 
         printf("Saved %s\n",file);
@@ -436,7 +432,7 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
         printf("Saved %s\n",file);
         break;
     default:
-        printf("not ppm or pgm\n");
+        printf("Failed to load %s\n",file);
         break;
     }
     fclose(output);
@@ -452,12 +448,6 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     strcpy(copy_string,string);
     
     char *p=strtok(string," ");
-
-    /*if(count==0 && strcmp(p,"LOAD")!=0) {
-        if(strcmp(p,"EXIT")==0)  return 10;
-        printf("No image loaded\n");
-        return 0;
-    }*/
 
     ///load
     if(strcmp(p,"LOAD")==0){
@@ -501,6 +491,7 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     /// exit
     if(strcmp(p,"EXIT")==0)
     {
+        if(count==0) return 11;
         return 10;
     }
 
@@ -568,11 +559,11 @@ int select_function_identifier(int count,char string[NMAX],struct global_image i
         if(count==0) return 11;
 
         if(max_of_numbers(cpx1,cpx2)>image.width) {
-            printf("Invalid coordinates\n");
+            printf("Invalid set of coordinates\n");
             return 0;
         }
         if(max_of_numbers(cpy1,cpy2)>image.height) {
-            printf("Invalid coordinates\n");
+            printf("Invalid set of coordinates\n");
             return 0;
         }
         if(cpx1==cpx2 || cpy1==cpy2) {
@@ -894,7 +885,6 @@ void crop_function(struct global_image *image)
 
 void rotate_function_helper(struct global_image *image,int angle)
 {
-    //if(image->x_axis!=image->y_axis) {printf("The selection must be square\n");return ;}
     switch(angle)
     {
         case 90:
@@ -1200,4 +1190,72 @@ int **kernel_matrixes_creator(char parameter[NMAX])
     }
 	
 	return kernel;
+}
+
+void checker_0_and_255_case(double *a)
+{
+    if(*a<0) *a=0;
+    if(*a>255) *a=255;
+}
+void apply_kernel(struct global_image *image,int x1,int y1,int x2,int y2,int **kernel,int div)
+{
+    for(int i=y1; i<y2; i++)
+    {
+        for(int j=x1; j<x2; j++)
+        {
+            double sum_r=0,sum_g=0,sum_b=0;
+            for(int m=-1; m<=1; m++) 
+            {
+                for(int n=-1; n<=1; n++)
+                {
+                    if(i+m>=0 && i+m<image->height && j+n>=0 && j+n<image->width) 
+                        {
+                            sum_r+=image->red[i+m][j+n]*kernel[m+1][n+1];
+                            sum_g+=image->green[i+m][j+n]*kernel[m+1][n+1];
+                            sum_b+=image->blue[i+m][j+n]*kernel[m+1][n+1];
+                        }
+                }
+            }
+            sum_r/=div;
+            sum_g/=div;
+            sum_b/=div;
+
+            checker_0_and_255_case(&sum_b);
+            checker_0_and_255_case(&sum_g);
+            checker_0_and_255_case(&sum_r);
+
+            image->red_crop[i-y1][j-x1]=(int)round(sum_r);
+            image->blue_crop[i-y1][j-x1]=(int)round(sum_b);
+            image->green_crop[i-y1][j-x1]=(int)round(sum_g);   
+        }
+    }
+    free_matrix(3,kernel);
+}
+
+void kernel_interface_helper(struct global_image *image,char parameter[NMAX],int x1,int y1,int x2,int y2)
+{
+    int **kernel=kernel_matrixes_creator(parameter);
+
+    if(!kernel) {
+        printf("Alloc failed");
+        return ;
+    }
+
+
+    if(strcmp(parameter,"EDGE")==0) {
+        apply_kernel(image,x1,y1,x2,y2,kernel,1);
+    }
+
+    if(strcmp(parameter,"SHARPEN")==0) {
+        apply_kernel(image,x1,y1,x2,y2,kernel,1);
+    }
+
+    if(strcmp(parameter,"BLUR")==0) {
+        apply_kernel(image,x1,y1,x2,y2,kernel,9);
+    }
+
+    if(strcmp(parameter,"GAUSSIAN_BLUR")==0) {
+        apply_kernel(image,x1,y1,x2,y2,kernel,16);
+    }
+    printf("Apply %s done\n",parameter);
 }
