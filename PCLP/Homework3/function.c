@@ -4,9 +4,7 @@
 #include <math.h>
 #include "function.h"
 #include <string.h>
-
 #define NMAX 30
-
 struct global_image
 {
     char type[3];
@@ -153,19 +151,24 @@ int file_type(FILE *fptr,char s[NMAX])
     switch(determine_type[1])
     {
         case '2':
-            
+            fseek(fptr,0,0);
+            fclose(fptr);
             return 2;
         case '3':
-           
+            fseek(fptr,0,0);
+            fclose(fptr);
             return 3;
         case '5':
-            
+            fseek(fptr,0,0);
+            fclose(fptr);
             return 5;
         case '6':
-            
+            fseek(fptr,0,0);
+            fclose(fptr);
             return 6;
     }
     return 0;
+    fclose(fptr);
 }
 
 void file_reader_first_version(int *count,char s[NMAX],int type,FILE *fptr,struct global_image* image)
@@ -448,6 +451,12 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     strcpy(copy_string,string);
     
     char *p=strtok(string," ");
+
+    /*if(count==0 && strcmp(p,"LOAD")!=0) {
+        if(strcmp(p,"EXIT")==0)  return 10;
+        printf("No image loaded\n");
+        return 0;
+    }*/
 
     ///load
     if(strcmp(p,"LOAD")==0){
@@ -885,6 +894,7 @@ void crop_function(struct global_image *image)
 
 void rotate_function_helper(struct global_image *image,int angle)
 {
+    //if(image->x_axis!=image->y_axis) {printf("The selection must be square\n");return ;}
     switch(angle)
     {
         case 90:
