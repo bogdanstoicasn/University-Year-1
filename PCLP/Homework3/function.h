@@ -10,7 +10,7 @@ void swap_function(int* a,int* b);
 void free_matrix(int line,int **matrix);
 int **alloc_matrix(int line, int coloumn);
 void print_matrix(struct global_image element);
-void free_global_matrix(int type,struct global_image* image);
+void free_global_matrix(struct global_image* image);
 
 
 void ignore_comments(FILE* fp);
@@ -68,3 +68,5 @@ void kernel_interface_helper(struct global_image *image,char parameter[NMAX],int
 
 
 void refurbished_case1_loading(FILE *fptr,char s[NMAX],int *count,struct global_image *image);
+
+int refurbished_select_identifier(int count,char string[NMAX],struct global_image image,int *x1,int *y1,int *x2,int *y2);

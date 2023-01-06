@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -26,7 +28,7 @@ int main() {
             {
                 //int aux=file_type_determine;
                 file_type_determine=file_type(fptr,s);
-                if(file_type_determine==0 && count!=0) {free_global_matrix(file_type_determine,&image);count=0;}
+                if(file_type_determine==0 && count!=0) {free_global_matrix(&image);count=0;}
                 if(file_type_determine!=0) {
                 file_reader_first_version(&count,s,file_type_determine,fptr,&image);
                 load_one_time++;
@@ -40,7 +42,6 @@ int main() {
                 select_function_all(&image,&x1,&y1,&x2,&y2);
                 break;
             case 4:
-                printf("%d-%d-Histogram\n",h1_stars,h2_bins);
                 histogram_function(image,h1_stars,h2_bins);
                 break;
             case 5:
@@ -59,9 +60,8 @@ int main() {
                 file_printer_for_tests(&type,file,image);
                 break;
             case 10:
-                if(count !=0) free_global_matrix(file_type_determine,&image);
-                if(count==0 && load_one_time!=0) printf("No image loaded\n");
-                if(count==0 && load_one_time==0) printf("No image loaded\n");
+                if(count !=0) free_global_matrix(&image);
+                else printf("No image loaded\n");
                 break;
             case 11:
                 printf("No image loaded\n");
