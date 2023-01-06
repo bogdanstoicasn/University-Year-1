@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include "function.h"
-#define NMAX 30
+#define NMAX 50
 struct global_image
 {
     char type[3];
@@ -38,7 +38,7 @@ int main() {
             case 3://lasi selectul anterior ca nu deranjaza
                 select_function_all(&image,&x1,&y1,&x2,&y2);
                 break;
-            /*case 4:
+            case 4:
                 printf("%d-%d-Histogram\n",h1_stars,h2_bins);
                 histogram_function(image,h1_stars,h2_bins);
                 break;
@@ -48,14 +48,13 @@ int main() {
             case 6:
                 rotate_function_helper(&image,angle);
                 break;
-                */
             case 7:
                 crop_function(&image);
                 break;
-            /*case 8:
+            case 8:
                 kernel_interface_helper(&image,parameter,x1,y1,x2,y2);
                 break;
-                */
+                
             case 9:///works
                 file_printer_for_tests(&type,file,image);
                 break;

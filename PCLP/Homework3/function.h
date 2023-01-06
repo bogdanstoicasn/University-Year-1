@@ -1,4 +1,4 @@
-#define NMAX 30
+#define NMAX 50
 
 struct global_image;
 

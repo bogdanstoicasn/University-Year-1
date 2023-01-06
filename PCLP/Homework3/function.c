@@ -4,7 +4,7 @@
 #include <math.h>
 #include "function.h"
 #include <string.h>
-#define NMAX 30
+#define NMAX 50
 struct global_image
 {
     char type[3];
@@ -375,7 +375,7 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
 
 void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
 {   
-    FILE *output=fopen(file,"wt");
+    FILE *output=fopen(file,"w");
     switch (*type)
     {
     case 2:
@@ -386,6 +386,7 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
             {
                 fprintf(output,"%d ",image.red[i][j]);
             }
+            if(i<image.height-1) fprintf(output,"\n");
         }
 
         printf("Saved %s\n",file);
@@ -398,6 +399,7 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
             {
                 fprintf(output,"%d %d %d ",image.red[i][j],image.green[i][j],image.blue[i][j]);
             }
+            if(i<image.height-1) fprintf(output,"\n");
         }
 
         printf("Saved %s\n",file);
@@ -446,8 +448,11 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
 {
     char string[NMAX],copy_string[NMAX];
     fgets(string,NMAX,stdin);
-   
-    string[strlen(string)-1]='\0';
+    for(size_t i=0; i<strlen(string); i++)
+    {
+        if(string[i]=='\n') string[i]='\0';
+    }
+    
     strcpy(copy_string,string);
     
     char *p=strtok(string," ");
@@ -457,7 +462,6 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
         printf("No image loaded\n");
         return 0;
     }*/
-
     ///load
     if(strcmp(p,"LOAD")==0){
         return load_function_identifier(copy_string,s);
@@ -503,6 +507,12 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
         if(count==0) return 11;
         return 10;
     }
+    if(strcmp(p,"EXIT")==0)
+    {
+        if(count==0) return 11;
+        return 10;
+    }
+
 
     printf("Invalid command\n");
     return 0;
@@ -575,8 +585,8 @@ int select_function_identifier(int count,char string[NMAX],struct global_image i
             printf("Invalid set of coordinates\n");
             return 0;
         }
-        if(cpx1==cpx2 || cpy1==cpy2) {
-            printf("Invalid coordinates\n");
+        if(cpx1==cpx2 || cpy1==cpy2 || cpx1<0 || cpx2<0 || cpy1<0 || cpy2<0) {
+            printf("Invalid set of coordinates\n");
             return 0;
         }
         *x1=cpx1; *x2=cpx2; *y1=cpy1; *y2=cpy2;
