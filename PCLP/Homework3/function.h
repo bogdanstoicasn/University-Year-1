@@ -14,7 +14,7 @@ void free_global_matrix(int type,struct global_image* image);
 
 
 void ignore_comments(FILE* fp);
-int file_type(FILE *fptr,char s[NMAX],int *count,struct global_image *image);
+int file_type(FILE *fptr,char s[NMAX]);
 
 
 void file_reader_first_version(int *count,char s[NMAX],int type,FILE *fptr,struct global_image* image);

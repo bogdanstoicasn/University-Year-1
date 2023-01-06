@@ -129,14 +129,13 @@ void print_matrix(struct global_image element) {
 
 /// discovers the photo type
 /// working as intended
-int file_type(FILE *fptr,char s[NMAX],int *count,struct global_image *image)
+int file_type(FILE *fptr,char s[NMAX])
 {
     char determine_type[3];
     fptr=fopen(s,"r");
     if(!fptr)
     {
         printf("Failed to load %s\n",s);
-        if(*count!=0) {free_global_matrix(1,image);}
         return 0;
     }
     ignore_comments(fptr);
@@ -197,7 +196,6 @@ void file_reader_first_version(int *count,char s[NMAX],int type,FILE *fptr,struc
             break;
         default:
             fprintf(stderr,"Failed to load %s\n",s);
-            printf("Reader a ajusn\n");
             break;
     }
     (*count)=1;
@@ -224,7 +222,7 @@ void text_file_reader_pgm_edition(char s[NMAX],FILE *fptr,struct global_image* i
     
     if(!image->red)
     {
-        printf("Failed to load %s\n",s);
+        printf("Failed to alloc for %s\n",s);
         return;
     }
     for(int i=0; i<image->height; i++)
@@ -268,7 +266,7 @@ void text_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image* i
     image->blue_crop=alloc_matrix(image->height,image->width);
     if(!image->red || !image->green || !image->blue)
     {
-        printf("Failed to load %s\n",s);
+        printf("Failed to alloc for %s\n",s);
         return ;
     }
     for(int i=0; i<image->height; i++)
@@ -311,7 +309,7 @@ void binary_file_reader_pgm_edition(char s[NMAX],FILE *fptr, struct global_image
 
     if(!image->red)
     {
-        printf("Failed to load %s\n",s);
+        printf("Failed to alloc for %s\n",s);
         return ;
     }
     for(int i=0; i<image->height; i++)
@@ -356,7 +354,7 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
 
     if(!image->red || !image->green || !image->blue)
     {
-        printf("Failed to load %s\n",s);
+        printf("Failed to alloc for %s\n",s);
         return ;
     }
     for(int i=0; i<image->height; i++)
@@ -519,12 +517,6 @@ int operation_identifier(int count,char s[NMAX],int *x1,int *y1, int *x2,int *y2
     /// exit
     if(strcmp(p,"EXIT")==0)
     {
-        if(count==0) return 11;
-        return 10;
-    }
-    if(strcmp(p,"EXIT")==0)
-    {
-        if(count==0) return 11;
         return 10;
     }
 
@@ -560,7 +552,7 @@ int select_function_identifier(int count,char string[NMAX],struct global_image i
             if(strcmp(p,"ALL")==0) ok=1;
             else ok--;
         }
-        else
+        else 
         {
         if(contor==0)
         {
@@ -1295,42 +1287,3 @@ void kernel_interface_helper(struct global_image *image,char parameter[NMAX],int
     printf("APPLY %s done\n",parameter);
 }
 
-void refurbished_case1_loading(FILE *fptr,char s[NMAX],int *count,struct global_image *image)
-{
-    char determine_type[3];
-    fptr=fopen(s,"r");
-    if(!fptr)
-    {
-        if(*count!=0)
-        {
-            free_global_matrix(1,image);
-        }
-        printf("Failed to load %s\n",s);
-        return ;
-    }
-    ignore_comments(fptr);
-    fscanf(fptr,"%s",determine_type);
-    
-    if(determine_type[0]!='P') {
-        fclose(fptr);
-        if(*count!=0)
-        {
-            free_global_matrix(1,image);
-        }
-        printf("Failed to load %s\n",s);
-
-        return ;
-    }
-    if(determine_type[1]>='7' || determine_type[1]<='1' || determine_type[1]=='4' || determine_type[2]!=0) {
-        fclose(fptr);
-        if(*count!=0)
-        {
-            free_global_matrix(1,image);
-        }
-        printf("Failed to load %s\n",s);
-        return ;
-    }
-    int type=determine_type[1]-'0';
-    file_reader_first_version(count,s,type,fptr,image);
-
-}
