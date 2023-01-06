@@ -81,7 +81,7 @@ void free_matrix(int line,int **matrix) {
 void free_global_matrix(int type,struct global_image* image)
 {
     if(type==0) return ;
-    
+    type=image->type[1]-'0';
     switch(type)
     {
         case 2:
@@ -129,23 +129,26 @@ void print_matrix(struct global_image element) {
 
 /// discovers the photo type
 /// working as intended
-int file_type(FILE *fptr,char s[NMAX])
+int file_type(FILE *fptr,char s[NMAX],int *count,struct global_image *image)
 {
     char determine_type[3];
     fptr=fopen(s,"r");
     if(!fptr)
     {
-        fprintf(stderr,"Failed to load %s\n",s);
+        printf("Failed to load %s\n",s);
+        if(*count!=0) {free_global_matrix(1,image);}
         return 0;
     }
     ignore_comments(fptr);
     fscanf(fptr,"%s",determine_type);
     if(determine_type[0]!='P') {
         fclose(fptr);
+        printf("Failed to load %s\n",s);
         return 0;
     }
     if(determine_type[1]>='7' || determine_type[1]<='1' || determine_type[1]=='4' || determine_type[2]!=0) {
         fclose(fptr);
+        printf("Failed to load %s\n",s);
         return 0;
     }
     switch(determine_type[1])
@@ -167,8 +170,9 @@ int file_type(FILE *fptr,char s[NMAX])
             fclose(fptr);
             return 6;
     }
-    return 0;
     fclose(fptr);
+    return 0;
+    //fclose(fptr);
 }
 
 void file_reader_first_version(int *count,char s[NMAX],int type,FILE *fptr,struct global_image* image)
@@ -193,6 +197,7 @@ void file_reader_first_version(int *count,char s[NMAX],int type,FILE *fptr,struc
             break;
         default:
             fprintf(stderr,"Failed to load %s\n",s);
+            printf("Reader a ajusn\n");
             break;
     }
     (*count)=1;
@@ -219,7 +224,7 @@ void text_file_reader_pgm_edition(char s[NMAX],FILE *fptr,struct global_image* i
     
     if(!image->red)
     {
-        fprintf(stderr,"Failed to load %s\n",s);
+        printf("Failed to load %s\n",s);
         return;
     }
     for(int i=0; i<image->height; i++)
@@ -233,6 +238,8 @@ void text_file_reader_pgm_edition(char s[NMAX],FILE *fptr,struct global_image* i
             image->red_crop[i][j]=x;
         }
     }
+    image->x_axis=image->width;
+    image->y_axis=image->height;
     printf("Loaded %s\n",s);
     fclose(fptr);
 }
@@ -261,7 +268,7 @@ void text_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image* i
     image->blue_crop=alloc_matrix(image->height,image->width);
     if(!image->red || !image->green || !image->blue)
     {
-        fprintf(stderr,"Failed to load %s\n",s);
+        printf("Failed to load %s\n",s);
         return ;
     }
     for(int i=0; i<image->height; i++)
@@ -279,6 +286,8 @@ void text_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image* i
             image->blue_crop[i][j]=z;
         }
     }
+    image->x_axis=image->width;
+    image->y_axis=image->height;
     printf("Loaded %s\n",s);
     fclose(fptr);
 }
@@ -302,7 +311,7 @@ void binary_file_reader_pgm_edition(char s[NMAX],FILE *fptr, struct global_image
 
     if(!image->red)
     {
-        fprintf(stderr,"Failed to load %s\n",s);
+        printf("Failed to load %s\n",s);
         return ;
     }
     for(int i=0; i<image->height; i++)
@@ -316,6 +325,8 @@ void binary_file_reader_pgm_edition(char s[NMAX],FILE *fptr, struct global_image
             image->red_crop[i][j]=(int)c;
         }
     }
+    image->x_axis=image->width;
+    image->y_axis=image->height;
     printf("Loaded %s\n",s);
     fclose(fptr);
 }
@@ -345,7 +356,7 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
 
     if(!image->red || !image->green || !image->blue)
     {
-        fprintf(stderr,"Failed to load %s\n",s);
+        printf("Failed to load %s\n",s);
         return ;
     }
     for(int i=0; i<image->height; i++)
@@ -368,6 +379,8 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
             image->blue_crop[i][j]=(int)e;
         }
     }
+    image->x_axis=image->width;
+    image->y_axis=image->height;
     printf("Loaded %s\n",s);
     fclose(fptr);
 
@@ -375,7 +388,9 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
 
 void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
 {   
-    FILE *output=fopen(file,"w");
+    FILE *output;
+    if(*type==2 || *type==5) output=fopen(file,"wt");
+    else output=fopen(file,"wb");
     switch (*type)
     {
     case 2:
@@ -1277,5 +1292,45 @@ void kernel_interface_helper(struct global_image *image,char parameter[NMAX],int
     if(strcmp(parameter,"GAUSSIAN_BLUR")==0) {
         apply_kernel(image,x1,y1,x2,y2,kernel,16);
     }
-    printf("Apply %s done\n",parameter);
+    printf("APPLY %s done\n",parameter);
+}
+
+void refurbished_case1_loading(FILE *fptr,char s[NMAX],int *count,struct global_image *image)
+{
+    char determine_type[3];
+    fptr=fopen(s,"r");
+    if(!fptr)
+    {
+        if(*count!=0)
+        {
+            free_global_matrix(1,image);
+        }
+        printf("Failed to load %s\n",s);
+        return ;
+    }
+    ignore_comments(fptr);
+    fscanf(fptr,"%s",determine_type);
+    
+    if(determine_type[0]!='P') {
+        fclose(fptr);
+        if(*count!=0)
+        {
+            free_global_matrix(1,image);
+        }
+        printf("Failed to load %s\n",s);
+
+        return ;
+    }
+    if(determine_type[1]>='7' || determine_type[1]<='1' || determine_type[1]=='4' || determine_type[2]!=0) {
+        fclose(fptr);
+        if(*count!=0)
+        {
+            free_global_matrix(1,image);
+        }
+        printf("Failed to load %s\n",s);
+        return ;
+    }
+    int type=determine_type[1]-'0';
+    file_reader_first_version(count,s,type,fptr,image);
+
 }
