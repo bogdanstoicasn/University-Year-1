@@ -1,35 +1,29 @@
 ####Copyright 2022-2023 Stoica Bogdan (bogdanstoicasn@yahoo.com)
 # compilator
+
 CC = gcc
-OUT=image_editor
-# flags for warnings
-CFLAGS = -Wall -Wextra -std=c99
+CFLAGS = -Wall -Wextra -Werror -std=c99
 
-# object files created at build
-OBJ = function.o main.o
+SOURCES = function.c interface.c main.c
+OBJECTS = $(SOURCES:.c=.o)
 
-#build program -- same as: gcc function.o main.o -o 
-build: function main
-	$(CC) $(OBJ) -o ./$(OUT) -lm
+EXECUTABLE = image_editor
 
-# function compilation -- same as: gcc --Wall -Wextra -c function.h function.c 
-function: function.h function.c
-	$(CC) $(CFLAGS) -c $@.c -lm
+all: $(EXECUTABLE)
 
-# main function compilation -- same as: gcc --Wall -Wextra -c main.c 
-main: main.c
-	$(CC) $(CFLAGS) -c $@.c -lm
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXECUTABLE) -lm
 
-#run
-run: build
-	./$(OUT)
-
-#clean
-clean:
-	rm -f *.o ./$(OUT)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 	
-#pack	
+run: build
+	./image_editor
+
+clean:
+	rm -f $(EXECUTABLE) $(OBJECTS)
+
 pack:
 	zip -FSr file.zip README Makefile *.c *.h
 	
-.PHONY: pack clean
+.PHONY: pack clean build

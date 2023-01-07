@@ -1,11 +1,8 @@
-
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
-#include <math.h>
 #include "function.h"
+#include "interface.h"
 #define NMAX 50
 struct global_image
 {
@@ -59,8 +56,7 @@ int main() {
                 file_printer_for_tests(&type,file,image);
                 break;
             case 10:
-                if(count !=0) free_global_matrix(&image);
-                else printf("No image loaded\n");
+                (count!=0) ? free_global_matrix(&image) : printf("No image loaded\n");
                 break;
             case 11:
                 printf("No image loaded\n");
