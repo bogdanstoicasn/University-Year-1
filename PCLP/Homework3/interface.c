@@ -264,6 +264,12 @@ int rotate_function_identifier(int count,char string[NMAX],struct global_image i
     while(p)
     {
         copy_angle=atoi(p);
+        for (int i = 0; i < (int)strlen(p); i++) {
+				if ((p[i] < '0' || p[i] > '9') && p[i] != '-') {
+					printf("Invalid command\n");
+					return 0;
+				}
+			}
         p=strtok(NULL," ");
     }
     if(copy_angle==-1) {

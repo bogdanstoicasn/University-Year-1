@@ -328,9 +328,10 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
         {
             for(int j=0; j<image.width; j++)
             {
-                fprintf(output,"%d ",image.red[i][j]);
+                fprintf(output,"%d",image.red[i][j]);
+                if(j<image.width-1) fprintf(output," ");
             }
-            if(i<image.height-1) fprintf(output,"\n");
+            fprintf(output,"\n");
         }
 
         printf("Saved %s\n",file);
@@ -343,7 +344,7 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
             {
                 fprintf(output,"%d %d %d ",image.red[i][j],image.green[i][j],image.blue[i][j]);
             }
-            if(i<image.height-1) fprintf(output,"\n");
+            fprintf(output,"\n");
         }
 
         printf("Saved %s\n",file);
@@ -539,8 +540,6 @@ void crop_function(struct global_image *image)
                 image->red[i][j]=image->red_crop[i][j];
             }
         }
-
-        printf("Image cropped\n");
     }
     if(image->type[1]=='3' || image->type[1]=='6')
     {
@@ -578,39 +577,38 @@ void crop_function(struct global_image *image)
             }
         }
 
-        printf("Image cropped\n");
     }
 }
 
-void rotate_function_helper(struct global_image *image,int angle)
+void rotate_function_helper(struct global_image *image,int angle,int x1,int y1,int x2,int y2)
 {
     //if(image->x_axis!=image->y_axis) {printf("The selection must be square\n");return ;}
     switch(angle)
     {
         case 90:
-            clockwise_rotation_90(image);
+            clockwise_rotation_90(image,x1,y1,x2,y2);
             printf("Rotated 90\n");
             break;
         case -90:
-            counter_clockwise_rotation_90(image);
+            counter_clockwise_rotation_90(image,x1,y1,x2,y2);
             printf("Rotated -90\n");
             break;
         case 180:
-            clockwise_rotation_90(image);
-            clockwise_rotation_90(image);
+            clockwise_rotation_90(image,x1,y1,x2,y2);
+            clockwise_rotation_90(image,x1,y1,x2,y2);
             printf("Rotated 180\n");
             break;
         case -180:
-            counter_clockwise_rotation_90(image);
-            counter_clockwise_rotation_90(image);
+            counter_clockwise_rotation_90(image,x1,y1,x2,y2);
+            counter_clockwise_rotation_90(image,x1,y1,x2,y2);
             printf("Rotated -180\n");
             break;
         case 270:
-            counter_clockwise_rotation_90(image);
+            counter_clockwise_rotation_90(image,x1,y1,x2,y2);
             printf("Rotated 270\n");
             break;
         case -270:
-            clockwise_rotation_90(image);
+            clockwise_rotation_90(image,x1,y1,x2,y2);
             printf("Rotated -270\n");
             break;
         case 360:
@@ -628,7 +626,7 @@ void rotate_function_helper(struct global_image *image,int angle)
     }
 }
 // both rotations are done and they work as intended 
-void counter_clockwise_rotation_90(struct global_image *image)
+void counter_clockwise_rotation_90(struct global_image *image,int x1,int y1,int x2,int y2)
 {
     ///merge doar o
     if(image->type[1]=='2' || image->type[1]=='5') {
@@ -649,6 +647,36 @@ void counter_clockwise_rotation_90(struct global_image *image)
         image->y_axis=tmp;
 
         image->red_crop=output;
+        int count_image=0, count_select=0;
+        for(int i=0; i<image->height; i++)
+            for(int j=0; j<image->width; j++)
+                count_image++;
+
+        for(int i=0; i<image->x_axis; i++)
+            for(int j=0; j<image->y_axis; j++)
+                count_select++;
+
+        if(count_image==count_select) {
+            free_matrix(image->height,image->red);
+            image->red=alloc_matrix(image->width,image->height);
+            int aux=image->width;
+            image->width=image->height;
+            image->height=aux;
+            for(int i=0; i<image->height; i++)
+                for(int j=0; j<image->width; j++)
+                    image->red[i][j]=image->red_crop[i][j];
+            
+        }
+        else {
+            for(int i=y1; i<y2; i++)
+            {
+                for(int j=x1; j<x2; j++)
+                {
+                    image->red[i][j]=image->red_crop[i-y1][j-x1];
+                }
+            }
+        }
+
     }
 
     if(image->type[1]=='3' || image->type[1]=='6') {
@@ -693,10 +721,50 @@ void counter_clockwise_rotation_90(struct global_image *image)
         image->red_crop=output;
         image->blue_crop=output_b;
         image->green_crop=output_g;
+
+        int count_image=0, count_select=0;
+        for(int i=0; i<image->height; i++)
+            for(int j=0; j<image->width; j++)
+                count_image++;
+
+        for(int i=0; i<image->x_axis; i++)
+            for(int j=0; j<image->y_axis; j++)
+                count_select++;
+
+        if(count_image==count_select) {
+            free_matrix(image->height,image->red);
+            free_matrix(image->height,image->blue);
+            free_matrix(image->height,image->green);
+            image->red=alloc_matrix(image->width,image->height);
+            image->green=alloc_matrix(image->width,image->height);
+            image->blue=alloc_matrix(image->width,image->height);
+            int aux=image->width;
+            image->width=image->height;
+            image->height=aux;
+            for(int i=0; i<image->height; i++)
+                for(int j=0; j<image->width; j++)
+                    {
+                        image->red[i][j]=image->red_crop[i][j];
+                        image->blue[i][j]=image->blue_crop[i][j];
+                        image->green[i][j]=image->green_crop[i][j];
+                    
+                    }
+        }
+        else {
+            for(int i=y1; i<y2; i++)
+            {
+                for(int j=x1; j<x2; j++)
+                {
+                    image->red[i][j]=image->red_crop[i-y1][j-x1];
+                    image->blue[i][j]=image->blue_crop[i-y1][j-x1];
+                    image->green[i][j]=image->green_crop[i-y1][j-x1];
+                }
+            }
+        }
     }
 }
 
-void clockwise_rotation_90(struct global_image *image)
+void clockwise_rotation_90(struct global_image *image,int x1,int y1,int x2,int y2)
 {
     if(image->type[1]=='2' || image->type[1]=='5') {
         int **output=alloc_matrix(image->x_axis,image->y_axis);
@@ -714,6 +782,35 @@ void clockwise_rotation_90(struct global_image *image)
         image->y_axis=tmp;
 
         image->red_crop=output;
+
+        int count_image=0, count_select=0;
+        for(int i=0; i<image->height; i++)
+            for(int j=0; j<image->width; j++)
+                count_image++;
+
+        for(int i=0; i<image->x_axis; i++)
+            for(int j=0; j<image->y_axis; j++)
+                count_select++;
+
+        if(count_image==count_select) {
+            free_matrix(image->height,image->red);
+            image->red=alloc_matrix(image->width,image->height);
+            int aux=image->width;
+            image->width=image->height;
+            image->height=aux;
+            for(int i=0; i<image->height; i++)
+                for(int j=0; j<image->width; j++)
+                    image->red[i][j]=image->red_crop[i][j];
+        }
+        else {
+            for(int i=y1; i<y2; i++)
+            {
+                for(int j=x1; j<x2; j++)
+                {
+                    image->red[i][j]=image->red_crop[i-y1][j-x1];
+                }
+            }
+        }
     }
 
     if(image->type[1]=='3' || image->type[1]=='6') {
@@ -751,7 +848,7 @@ void clockwise_rotation_90(struct global_image *image)
         free_matrix(image->y_axis,image->blue_crop);
         free_matrix(image->y_axis,image->green_crop);
 
-        swap_function(&image->x_axis,&image->y_axis);
+
         int tmp=image->x_axis;
         image->x_axis=image->y_axis;
         image->y_axis=tmp;
@@ -759,6 +856,47 @@ void clockwise_rotation_90(struct global_image *image)
         image->red_crop=output;
         image->blue_crop=output_b;
         image->green_crop=output_g;
+
+        int count_image=0, count_select=0;
+        for(int i=0; i<image->height; i++)
+            for(int j=0; j<image->width; j++)
+                count_image++;
+
+        for(int i=0; i<image->x_axis; i++)
+            for(int j=0; j<image->y_axis; j++)
+                count_select++;
+
+        if(count_image==count_select) {
+            free_matrix(image->height,image->red);
+            free_matrix(image->height,image->blue);
+            free_matrix(image->height,image->green);
+            image->red=alloc_matrix(image->width,image->height);
+            image->green=alloc_matrix(image->width,image->height);
+            image->blue=alloc_matrix(image->width,image->height);
+            int aux=image->width;
+            image->width=image->height;
+            image->height=aux;
+            for(int i=0; i<image->height; i++)
+                for(int j=0; j<image->width; j++)
+                    {
+                        image->red[i][j]=image->red_crop[i][j];
+                        image->blue[i][j]=image->blue_crop[i][j];
+                        image->green[i][j]=image->green_crop[i][j];
+                    
+                    }
+        }
+        else {
+            for(int i=y1; i<y2; i++)
+            {
+                for(int j=x1; j<x2; j++)
+                {
+                    image->red[i][j]=image->red_crop[i-y1][j-x1];
+                    image->blue[i][j]=image->blue_crop[i-y1][j-x1];
+                    image->green[i][j]=image->green_crop[i-y1][j-x1];
+                }
+            }
+        }
+
     }
 }
 
@@ -885,15 +1023,17 @@ void apply_kernel(struct global_image *image,int x1,int y1,int x2,int y2,int **k
         for(int j=x1; j<x2; j++)
         {
             double sum_r=0,sum_g=0,sum_b=0;
+            int ok=0;
             for(int m=-1; m<=1; m++) 
             {
                 for(int n=-1; n<=1; n++)
                 {
-                    if(i+m>0 && i+m<image->height && j+n>0 && j+n<image->width) 
+                    if(i>0 && i<image->height && j>0 && j<image->width) 
                         {
                             sum_r+=image->red[i+m][j+n]*kernel[m+1][n+1];
                             sum_g+=image->green[i+m][j+n]*kernel[m+1][n+1];
                             sum_b+=image->blue[i+m][j+n]*kernel[m+1][n+1];
+                            ok++;
                         }
                 }
             }
@@ -904,10 +1044,10 @@ void apply_kernel(struct global_image *image,int x1,int y1,int x2,int y2,int **k
             checker_0_and_255_case(&sum_b);
             checker_0_and_255_case(&sum_g);
             checker_0_and_255_case(&sum_r);
-
-            image->red_crop[i-y1][j-x1]=(int)round(sum_r);
-            image->blue_crop[i-y1][j-x1]=(int)round(sum_b);
-            image->green_crop[i-y1][j-x1]=(int)round(sum_g);   
+            if(ok!=0)
+            {image->red_crop[i-y1][j-x1]=round(sum_r);
+            image->blue_crop[i-y1][j-x1]=round(sum_b);
+            image->green_crop[i-y1][j-x1]=round(sum_g);}   
         }
     }
     for(int i=y1; i<y2; i++)
@@ -930,7 +1070,6 @@ void kernel_interface_helper(struct global_image *image,char parameter[NMAX],int
         printf("Alloc failed");
         return ;
     }
-
 
     if(strcmp(parameter,"EDGE")==0) {
         apply_kernel(image,x1,y1,x2,y2,kernel,1);

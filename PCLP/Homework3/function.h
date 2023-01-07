@@ -29,9 +29,9 @@ void crop_function(struct global_image *image);
 void equalize_function(struct global_image *image);
 
 
-void counter_clockwise_rotation_90(struct global_image *image);
-void clockwise_rotation_90(struct global_image *image);
-void rotate_function_helper(struct global_image *image,int angle);
+void counter_clockwise_rotation_90(struct global_image *image,int x1,int y1,int x2,int y2);
+void clockwise_rotation_90(struct global_image *image,int x1,int y1,int x2,int y2);
+void rotate_function_helper(struct global_image *image,int angle,int x1,int y1,int x2,int y2);
 
 
 void histogram_function(struct global_image image,int h1_star,int h2_bins);

@@ -9,16 +9,16 @@ OBJECTS = $(SOURCES:.c=.o)
 
 EXECUTABLE = image_editor
 
-all: $(EXECUTABLE)
+build: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXECUTABLE) -lm
+	$(CC) $(CFLAGS) $(OBJECTS) -o ./$(EXECUTABLE) -lm
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ 
 	
 run: build
-	./image_editor
+	./$(EXECUTABLE)
 
 clean:
 	rm -f $(EXECUTABLE) $(OBJECTS)

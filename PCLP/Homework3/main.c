@@ -44,10 +44,11 @@ int main() {
                 equalize_function(&image);
                 break;
             case 6:
-                rotate_function_helper(&image,angle);
+                rotate_function_helper(&image,angle,x1,y1,x2,y2);
                 break;
             case 7:
                 crop_function(&image);
+                printf("Image cropped\n");
                 break;
             case 8:
                 kernel_interface_helper(&image,parameter,x1,y1,x2,y2);
