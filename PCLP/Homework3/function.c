@@ -320,6 +320,8 @@ void histogram_function(struct global_image image,int h1_star,int h2_bins)
 void equalize_function(struct global_image *image)
 {
     int *frequency=calloc(256,sizeof(int));
+    double area=image->width*image->height;
+
     if(!frequency) {
         printf("Alloc failed\n");
         return ;
@@ -328,17 +330,16 @@ void equalize_function(struct global_image *image)
         for(int j=0; j<image->width; j++)
             frequency[(image->red[i][j])]++;
     
-    double area=image->width*image->height;
     for(int i=0; i<image->height; i++)
     {
         for(int j=0; j<image->width; j++)
         {
-            double sum=0;
+            int sum=0;
             for(int k=0; k<=image->red[i][j]; k++)
                 sum+=frequency[k];
             
             double final_result;
-            final_result=255*sum/area;
+            final_result=255*1.00000*(sum/area);
 
             image->red[i][j]=round(final_result);
             if(image->red[i][j]>255) image->red[i][j]=255;

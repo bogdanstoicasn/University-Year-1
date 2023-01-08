@@ -149,6 +149,7 @@ void binary_file_reader_pgm_edition(char s[NMAX],FILE *fptr, struct global_image
     ignore_comments(fptr);
     fscanf(fptr,"%d\n",&image->maxValue);
     
+    ignore_comments(fptr);
     image->red=alloc_matrix(image->height,image->width);
     image->red_crop=alloc_matrix(image->height,image->width);
 
@@ -188,8 +189,8 @@ void binary_file_reader_ppm_edition(char s[NMAX],FILE *fptr,struct global_image*
 
     ignore_comments(fptr);
     fscanf(fptr,"%d",&image->maxValue);
-    ignore_comments(fptr);
 
+    ignore_comments(fptr);
     image->red=alloc_matrix(image->height,image->width);
     image->green=alloc_matrix(image->height,image->width);
     image->blue=alloc_matrix(image->height,image->width);

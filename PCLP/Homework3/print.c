@@ -68,14 +68,13 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
                 unsigned char c=(unsigned char)image.red[i][j];
                 fwrite(&c,sizeof(unsigned char),1,output);
 
-                unsigned char d=(char)image.green[i][j];
+                unsigned char d=(unsigned char)image.green[i][j];
                 fwrite(&d,sizeof(unsigned char),1,output);
                 
-                unsigned char e=(char)image.blue[i][j];
+                unsigned char e=( char)image.blue[i][j];
                 fwrite(&e,sizeof(unsigned char),1,output);
             }
         }
-
         printf("Saved %s\n",file);
         break;
     default:
