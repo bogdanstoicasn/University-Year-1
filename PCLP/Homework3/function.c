@@ -949,13 +949,13 @@ void equalize_function(struct global_image *image)
         {
             double sum=0;
             for(int k=0; k<image->red[i][j]; k++)
-                sum+=frequency[k];
+                sum+=(double)frequency[k];
             
             double final_result,area;
             area=image->width*image->height;
             final_result=255*sum/area;
-            image->red[i][j]= round(final_result);
-            if(image->red[i][j]>255) image->red[i][j]=255;
+            image->red[i][j]= (int)round(final_result);
+            if(image->red[i][j]>=255) image->red[i][j]=255;
             if(image->red[i][j]<0) image->red[i][j]=0;
         }
     }
@@ -1028,13 +1028,13 @@ void apply_kernel(struct global_image *image,int x1,int y1,int x2,int y2,int **k
             {
                 for(int n=-1; n<=1; n++)
                 {
-                    if(i>0 && i<image->height && j>0 && j<image->width) 
-                        {
+                    if (i < 1 || j < 1 || i >= image->height - 1 || j>= image->width - 1) ;
+                    else   {
                             sum_r+=image->red[i+m][j+n]*kernel[m+1][n+1];
                             sum_g+=image->green[i+m][j+n]*kernel[m+1][n+1];
                             sum_b+=image->blue[i+m][j+n]*kernel[m+1][n+1];
                             ok++;
-                        }
+                    }
                 }
             }
             sum_r/=div;

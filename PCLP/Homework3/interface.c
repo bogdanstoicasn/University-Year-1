@@ -221,18 +221,19 @@ int histogram_function_identifier(int count,char string[NMAX],struct global_imag
 
 int save_function_identifier(char string[NMAX],char file[NMAX],int *type,struct global_image image)
 {
-    int contor=0;
-    for(size_t i=0; i<strlen(string); i++)
-    {
-        if(string[i]==' ') contor++;
-    }
-    
     char *p=strtok(string," ");
-    p=strtok(NULL," ");
-    strcpy(file,p);
+    /*p=strtok(NULL," ");
+    strcpy(file,p);*/
+    int ok=0;
+    while(p)
+    {
+        ok++;
+        if(ok==2) strcpy(file,p);
+        p=strtok(NULL," ");
+    }
 
     *type=image.type[1]-'0';
-    if(contor==2) {
+    if(ok==3) {
         if(*type==5) {
             *type=2;
             return 9;

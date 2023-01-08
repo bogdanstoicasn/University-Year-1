@@ -13,21 +13,21 @@ struct global_image
     int **blue,**blue_crop;
 };
 int main() {
-    char s[NMAX],parameter[NMAX],file[NMAX];
+    char name_of_file[NMAX],parameter[NMAX],file[NMAX];
     struct global_image image;
     int file_type_determine=0,type,h1_stars=0,h2_bins=0,angle=0,count=0;
     int x1,x2,y1,y2;
     FILE *fptr=NULL;
     while(1) {
-        int oppp=operation_identifier(count,s,&x1,&y1,&x2,&y2,&h1_stars,&h2_bins,&angle,parameter,file,&type,image);
+        int oppp=operation_identifier(count,name_of_file,&x1,&y1,&x2,&y2,&h1_stars,&h2_bins,&angle,parameter,file,&type,image);
         switch(oppp) {
             case 1: 
             {
                 //int aux=file_type_determine;
-                file_type_determine=file_type(fptr,s);
+                file_type_determine=file_type(fptr,name_of_file);
                 if(file_type_determine==0 && count!=0) {free_global_matrix(&image);count=0;}
                 if(file_type_determine!=0) {
-                file_reader_first_version(&count,s,file_type_determine,fptr,&image);
+                file_reader_first_version(&count,name_of_file,file_type_determine,fptr,&image);
                 }
                 break;
             }
