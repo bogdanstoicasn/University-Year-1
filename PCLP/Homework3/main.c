@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
 #include "function.h"
 #include "interface.h"
+#include "read.h"
+#include "print.h"
+#include "rotate.h"
+#include "kernel.h"
 #define NMAX 50
 struct global_image
 {

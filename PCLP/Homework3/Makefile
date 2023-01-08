@@ -4,7 +4,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -std=c99
 
-SOURCES = function.c interface.c main.c
+SOURCES = function.c interface.c read.c print.c rotate.c kernel.c main.c 
 OBJECTS = $(SOURCES:.c=.o)
 
 EXECUTABLE = image_editor
