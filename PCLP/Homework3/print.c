@@ -46,6 +46,7 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
         break;
     case 5:
         fprintf(output,"P5\n%d %d\n%d\n",image.width,image.height,image.maxValue);
+        
         for(int i=0; i<image.height; i++)
         {
             for(int j=0; j<image.width; j++)
@@ -59,6 +60,7 @@ void file_printer_for_tests(int *type,char file[NMAX],struct global_image image)
         break;
     case 6:
         fprintf(output,"P6\n%d %d\n%d\n",image.width,image.height,image.maxValue);
+
         for(int i=0; i<image.height; i++)
         {
             for(int j=0; j<image.width; j++)

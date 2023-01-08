@@ -328,20 +328,20 @@ void equalize_function(struct global_image *image)
         for(int j=0; j<image->width; j++)
             frequency[(image->red[i][j])]++;
     
-
+    double area=image->width*image->height;
     for(int i=0; i<image->height; i++)
     {
         for(int j=0; j<image->width; j++)
         {
             double sum=0;
-            for(int k=0; k<image->red[i][j]; k++)
+            for(int k=0; k<=image->red[i][j]; k++)
                 sum+=frequency[k];
             
-            double final_result,area;
-            area=image->width*image->height;
+            double final_result;
             final_result=255*sum/area;
+
             image->red[i][j]=round(final_result);
-            if(image->red[i][j]>=255) image->red[i][j]=255;
+            if(image->red[i][j]>255) image->red[i][j]=255;
             if(image->red[i][j]<0) image->red[i][j]=0;
         }
     }
