@@ -24,6 +24,6 @@ clean:
 	rm -f $(EXECUTABLE) $(OBJECTS)
 
 pack:
-	zip -FSr file.zip README Makefile *.c *.h
+	zip -FSr 315CA_StoicaMihaiBogdan_Tema3.zip README Makefile *.c *.h
 	
 .PHONY: pack clean build
