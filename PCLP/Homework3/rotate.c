@@ -14,7 +14,7 @@ struct global_image {
 
 // we rotate by type and angle with switch
 void rotate_function_helper(struct global_image *image, int angle,
-							int x1, int y1, int x2, int y2)
+							int *x1, int *y1, int *x2, int *y2)
 {
 	if (image->type[1] == '2' || image->type[1] == '5') {
 		switch (angle) {
@@ -85,7 +85,7 @@ void rotate_function_helper(struct global_image *image, int angle,
 
 // both rotations are done and they work as intended
 void counter_clockwise_rotation_90(struct global_image *image,
-								   int x1, int y1, int x2, int y2)
+								   int *x1, int *y1, int *x2, int *y2)
 {
 	//we do the rotation in the alloc bellow then
 	// we link with the image matrix
@@ -96,23 +96,14 @@ void counter_clockwise_rotation_90(struct global_image *image,
 	}
 	for (int i = 0; i < image->y_axis; i++)
 		for (int j = 0; j < image->x_axis; j++)
-			output[image->x_axis - j - 1][i] = image->red_crop[i][j];
-
-	free_matrix(image->y_axis, image->red_crop);
+			output[image->x_axis - j - 1][i] = image->red[i + *y1][j + *x1];
 
 	int tmp = image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
 
-	image->red_crop = output;
-
-	int count_image = 0, count_select = 0;
-	for (int i = 0; i < image->height; i++)
-		for (int j = 0; j < image->width; j++)
-			count_image++;
-	for (int i = 0; i < image->x_axis; i++)
-		for (int j = 0; j < image->y_axis; j++)
-			count_select++;
+	int count_image = image->width * image->height;
+	int count_select = image->x_axis * image->y_axis;
 
 	// check if all image or selection the count_select and count_image
 	if (count_image == count_select) {
@@ -126,17 +117,18 @@ void counter_clockwise_rotation_90(struct global_image *image,
 
 		for (int i = 0; i < image->height; i++)
 			for (int j = 0; j < image->width; j++)
-				image->red[i][j] = image->red_crop[i][j];
+				image->red[i][j] = output[i][j];
 
 	} else {
-		for (int i = y1; i < y2; i++)
-			for (int j = x1; j < x2; j++)
-				image->red[i][j] = image->red_crop[i - y1][j - x1];
+		for (int i = *y1; i < *y2; i++)
+			for (int j = *x1; j < *x2; j++)
+				image->red[i][j] = output[i - *y1][j - *x1];
 	}
+	free_matrix(image->y_axis, output);
 }
 
 void clockwise_rotation_90(struct global_image *image,
-						   int x1, int y1, int x2, int y2)
+						   int *x1, int *y1, int *x2, int *y2)
 {
 	//we do the rotation in the alloc bellow then
 	// we link with the image matrix
@@ -147,23 +139,14 @@ void clockwise_rotation_90(struct global_image *image,
 	}
 	for (int i = 0; i < image->y_axis; i++)
 		for (int j = 0; j < image->x_axis; j++)
-			output[j][image->y_axis - 1 - i] = image->red_crop[i][j];
+			output[j][image->y_axis - 1 - i] = image->red[i + *y1][j + *x1];
 
-	free_matrix(image->y_axis, image->red_crop);
-
-	int tmp = image->x_axis;
+	int tmp=image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
 
-	image->red_crop = output;
-
-	int count_image = 0, count_select = 0;
-	for (int i = 0; i < image->height; i++)
-		for (int j = 0; j < image->width; j++)
-			count_image++;
-	for (int i = 0; i < image->x_axis; i++)
-		for (int j = 0; j < image->y_axis; j++)
-			count_select++;
+	int count_image = image->width * image->height;
+	int count_select = image->x_axis * image->y_axis;
 
 	// check if all image or selection the count_select and count_image
 	if (count_image == count_select) {
@@ -177,16 +160,17 @@ void clockwise_rotation_90(struct global_image *image,
 
 		for (int i = 0; i < image->height; i++)
 			for (int j = 0; j < image->width; j++)
-				image->red[i][j] = image->red_crop[i][j];
+				image->red[i][j] = output[i][j];
 	} else {
-		for (int i = y1; i < y2; i++)
-			for (int j = x1; j < x2; j++)
-				image->red[i][j] = image->red_crop[i - y1][j - x1];
+		for (int i = *y1; i < *y2; i++)
+			for (int j = *x1; j < *x2; j++)
+				image->red[i][j] = output[i - *y1][j - *x1];
 	}
+	free_matrix(image->y_axis, output);
 }
 
 void counter_clockwise_rotation_90_color(struct global_image *image,
-										 int x1, int y1, int x2, int y2)
+										 int *x1, int *y1, int *x2, int *y2)
 {
 	//we do the rotation in the alloc bellow then
 	// we link with the image matrix
@@ -210,30 +194,17 @@ void counter_clockwise_rotation_90_color(struct global_image *image,
 	}
 	for (int i = 0; i < image->y_axis; i++)
 		for (int j = 0; j < image->x_axis; j++) {
-			output[image->x_axis - j - 1][i] = image->red_crop[i][j];
-			output_b[image->x_axis - j - 1][i] = image->blue_crop[i][j];
-			output_g[image->x_axis - j - 1][i] = image->green_crop[i][j];
+			output[image->x_axis - j - 1][i] = image->red[i + *y1][j + *x1];
+			output_b[image->x_axis - j - 1][i] = image->blue[i + *y1][j + *x1];
+			output_g[image->x_axis - j - 1][i] = image->green[i + *y1][j + *x1];
 		}
 
-	free_matrix(image->y_axis, image->red_crop);
-	free_matrix(image->y_axis, image->blue_crop);
-	free_matrix(image->y_axis, image->green_crop);
-
-	int tmp = image->x_axis;
+	int tmp=image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
 
-	image->red_crop = output;
-	image->blue_crop = output_b;
-	image->green_crop = output_g;
-
-	int count_image = 0, count_select = 0;
-	for (int i = 0; i < image->height; i++)
-		for (int j = 0; j < image->width; j++)
-			count_image++;
-	for (int i = 0; i < image->x_axis; i++)
-		for (int j = 0; j < image->y_axis; j++)
-			count_select++;
+	int count_image = image->width * image->height;
+	int count_select = image->x_axis * image->y_axis;
 
 	// check if all image or selection the count_select and count_image
 	if (count_image == count_select) {
@@ -251,23 +222,26 @@ void counter_clockwise_rotation_90_color(struct global_image *image,
 
 		for (int i = 0; i < image->height; i++)
 			for (int j = 0; j < image->width; j++) {
-				image->red[i][j] = image->red_crop[i][j];
-				image->blue[i][j] = image->blue_crop[i][j];
-				image->green[i][j] = image->green_crop[i][j];
+				image->red[i][j] = output[i][j];
+				image->blue[i][j] = output_b[i][j];
+				image->green[i][j] = output_g[i][j];
 			}
 	} else {
-		for (int i = y1; i < y2; i++) {
-			for (int j = x1; j < x2; j++) {
-				image->red[i][j] = image->red_crop[i - y1][j - x1];
-				image->blue[i][j] = image->blue_crop[i - y1][j - x1];
-				image->green[i][j] = image->green_crop[i - y1][j - x1];
+		for (int i = *y1; i < *y2; i++) {
+			for (int j = *x1; j < *x2; j++) {
+				image->red[i][j] = output[i - *y1][j - *x1];
+				image->blue[i][j] = output_b[i - *y1][j - *x1];
+				image->green[i][j] = output_g[i - *y1][j - *x1];
 			}
 		}
 	}
+	free_matrix(image->y_axis, output);
+	free_matrix(image->y_axis, output_b);
+	free_matrix(image->y_axis, output_g);
 }
 
 void clockwise_rotation_90_color(struct global_image *image,
-								 int x1, int y1, int x2, int y2)
+								 int *x1, int *y1, int *x2, int *y2)
 {
 	//we do the rotation in the alloc bellow then
 	// we link with the image matrix
@@ -291,30 +265,18 @@ void clockwise_rotation_90_color(struct global_image *image,
 	}
 	for (int i = 0; i < image->y_axis; i++)
 		for (int j = 0; j < image->x_axis; j++) {
-			output[j][image->y_axis - 1 - i] = image->red_crop[i][j];
-			output_b[j][image->y_axis - 1 - i] = image->blue_crop[i][j];
-			output_g[j][image->y_axis - 1 - i] = image->green_crop[i][j];
+			output[j][image->y_axis - 1 - i] = image->red[i + *y1][j + *x1];
+			output_b[j][image->y_axis - 1 - i] = image->blue[i + *y1][j + *x1];
+			output_g[j][image->y_axis - 1 - i] = image->green[i + *y1][j + *x1];
 		}
 
-	free_matrix(image->y_axis, image->red_crop);
-	free_matrix(image->y_axis, image->blue_crop);
-	free_matrix(image->y_axis, image->green_crop);
-
-	int tmp = image->x_axis;
+	int tmp=image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
 
-	image->red_crop = output;
-	image->blue_crop = output_b;
-	image->green_crop = output_g;
-	int count_image = 0, count_select = 0;
+	int count_image = image->width * image->height;
+	int count_select = image->x_axis * image->y_axis;
 
-	for (int i = 0; i < image->height; i++)
-		for (int j = 0; j < image->width; j++)
-			count_image++;
-	for (int i = 0; i < image->x_axis; i++)
-		for (int j = 0; j < image->y_axis; j++)
-			count_select++;
 	// check if all image or selection the count_select and count_image
 	if (count_image == count_select) {
 		free_matrix(image->height, image->red);
@@ -331,17 +293,20 @@ void clockwise_rotation_90_color(struct global_image *image,
 
 		for (int i = 0; i < image->height; i++)
 			for (int j = 0; j < image->width; j++) {
-				image->red[i][j] = image->red_crop[i][j];
-				image->blue[i][j] = image->blue_crop[i][j];
-				image->green[i][j] = image->green_crop[i][j];
+				image->red[i][j] = output[i][j];
+				image->blue[i][j] = output_b[i][j];
+				image->green[i][j] = output_g[i][j];
 			}
 	} else {
-		for (int i = y1; i < y2; i++) {
-			for (int j = x1; j < x2; j++) {
-				image->red[i][j] = image->red_crop[i - y1][j - x1];
-				image->blue[i][j] = image->blue_crop[i - y1][j - x1];
-				image->green[i][j] = image->green_crop[i - y1][j - x1];
+		for (int i = *y1; i < *y2; i++) {
+			for (int j = *x1; j < *x2; j++) {
+				image->red[i][j] = output[i - *y1][j - *x1];
+				image->blue[i][j] = output_b[i - *y1][j - *x1];
+				image->green[i][j] = output_g[i - *y1][j - *x1];
 			}
 		}
 	}
+	free_matrix(image->y_axis, output);
+	free_matrix(image->y_axis, output_b);
+	free_matrix(image->y_axis, output_g);
 }

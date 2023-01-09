@@ -29,7 +29,7 @@ int main(void)
 	while (1) {
 		int oppp = operation_identifier(count, name_of_file, &x1,
 										&y1, &x2, &y2, &h1_stars, &h2_bins,
-										&angle, parameter, file, &type, image);
+										&angle, parameter, file, &type, &image);
 	    switch (oppp) {
 		case 1: {
 			file_type_determine = file_type(fptr, name_of_file);
@@ -40,15 +40,15 @@ int main(void)
 			if (file_type_determine != 0) {
 				file_reader_first_version(&count, name_of_file,
 										  file_type_determine,
-										  fptr, &image);
+										  fptr, &image, &x1, &y1, &x2, &y2);
 			}
 			break;
 		}
 		case 2://idk, it works
-			select_function_integers(&image, x1, x2, y1, y2);
+			printf("Selected %d %d %d %d\n", x1, y1, x2, y2);
 			break;
-		case 3://lasi selectul anterior ca nu deranjaza
-			select_function_all(&image, &x1, &y1, &x2, &y2);
+		case 3:
+			printf("Selected ALL\n");
 			break;
 		case 4:
 			histogram_function(image, h1_stars, h2_bins);
@@ -57,10 +57,10 @@ int main(void)
 			equalize_function(&image);
 			break;
 		case 6:
-			rotate_function_helper(&image, angle, x1, y1, x2, y2);
+			rotate_function_helper(&image, angle, &x1, &y1, &x2, &y2);
 			break;
 		case 7:
-			crop_function(&image);
+			crop_function(&image, &x1, &y1, &x2, &y2);
 			break;
 		case 8:
 			kernel_interface_helper(&image, parameter, x1, y1, x2, y2);

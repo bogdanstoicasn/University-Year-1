@@ -5,7 +5,8 @@ struct global_image;
 
 void file_reader_first_version(int *count, char s[NMAX],
 							   int type, FILE *fptr,
-							   struct global_image *image);
+							   struct global_image *image,
+							   int *x1, int *y1, int *x2, int *y2);
 
 void text_file_reader_pgm_edition(char s[NMAX], FILE *fptr,
 								  struct global_image *image);

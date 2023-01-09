@@ -69,28 +69,20 @@ void free_global_matrix(struct global_image *image)
 	switch (type) {
 	case 2:
 		free_matrix(image->height, image->red);
-		free_matrix(image->y_axis, image->red_crop);
 		break;
 	case 3: {
 		free_matrix(image->height, image->red);
 		free_matrix(image->height, image->green);
 		free_matrix(image->height, image->blue);
-		free_matrix(image->y_axis, image->red_crop);
-		free_matrix(image->y_axis, image->green_crop);
-		free_matrix(image->y_axis, image->blue_crop);
 		break;
 		}
 	case 5:
 		free_matrix(image->height, image->red);
-		free_matrix(image->y_axis, image->red_crop);
 		break;
 	case 6: {
 		free_matrix(image->height, image->red);
 		free_matrix(image->height, image->green);
 		free_matrix(image->height, image->blue);
-		free_matrix(image->y_axis, image->red_crop);
-		free_matrix(image->y_axis, image->green_crop);
-		free_matrix(image->y_axis, image->blue_crop);
 		break;
 		}
 	default:
@@ -99,186 +91,67 @@ void free_global_matrix(struct global_image *image)
 	}
 }
 
-// de vazut daca se face select dupa select sau se ia de pe matricea principala
-void select_function_integers(struct global_image *image,
-							  int x1, int x2, int y1, int y2)
+void crop_function(struct global_image *image, int *x1, int *y1, int *x2, int *y2)
 {
 	if (image->type[1] == '2' || image->type[1] == '5') {
-		free_matrix(image->y_axis, image->red_crop);
-		image->x_axis = x2 - x1;
-		image->y_axis = y2 - y1;
-		image->red_crop = alloc_matrix(image->y_axis, image->x_axis);
-
-		if (!image->red_crop) {
-			fprintf(stderr, "Alloc failed\n");
+		int **output=alloc_matrix(*y2 - *y1, *x2 - *x1);
+		if (!output) {
+			fprintf(stderr, "Failed to crop\n");
 			return;
 		}
-
-		for (int i = y1; i < y2; i++)
-			for (int j = x1; j < x2; j++)
-				image->red_crop[i - y1][j - x1] = image->red[i][j];
-
-		printf("Selected %d %d %d %d\n", x1, y1, x2, y2);
+		for (int i = *y1; i < *y2; i++)
+			for ( int j=*x1; j < *x2; j++)
+				output[i - *y1][j - *x1] = image->red[i][j];
+		
+		free_global_matrix(image);
+		image->height = *y2 - *y1;
+		image->y_axis = *y2 - *y1;
+		image->width = *x2 - *x1;
+		image->x_axis = *x2 - *x1;
+		*x1 = 0;
+		*x2 = image->width;
+		*y1 = 0;
+		*y2 = image->height;
+		image->red = output;
 	}
 	if (image->type[1] == '3' || image->type[1] == '6') {
-		free_matrix(image->y_axis, image->red_crop);
-		free_matrix(image->y_axis, image->green_crop);
-		free_matrix(image->y_axis, image->blue_crop);
-
-		image->x_axis = x2 - x1;
-		image->y_axis = y2 - y1;
-
-		image->red_crop = alloc_matrix(image->y_axis, image->x_axis);
-		image->green_crop = alloc_matrix(image->y_axis, image->x_axis);
-		image->blue_crop = alloc_matrix(image->y_axis, image->x_axis);
-
-		if (!image->red_crop) {
-			fprintf(stderr, "Alloc failed\n");
+		int **output_r = alloc_matrix(*y2 - *y1, *x2 - *x1);
+		int **output_g = alloc_matrix(*y2 - *y1, *x2 - *x1);
+		int **output_b = alloc_matrix(*y2 - *y1, *x2 - *x1);
+		if (!output_r) {
+			fprintf(stderr, "Failed to crop\n");
 			return;
 		}
-		if (!image->green_crop) {
-			free_matrix(image->y_axis, image->red_crop);
-			fprintf(stderr, "ALLOc failed\n");
+		if (!output_g) {
+			free_matrix(*y2 - *y1, output_r);
+			fprintf(stderr, "Failed to crop\n");
 			return;
 		}
-		if (!image->blue_crop) {
-			free_matrix(image->y_axis, image->red_crop);
-			free_matrix(image->y_axis, image->green_crop);
-			fprintf(stderr, "Alloc failed\n");
+		if (!output_g) {
+			free_matrix(*y2 - *y1, output_r);
+			free_matrix(*y2 - *y1, output_g);
+			fprintf(stderr, "Failed to crop\n");
 			return;
 		}
-
-		for (int i = y1; i < y2; i++) {
-			for (int j = x1; j < x2; j++) {
-				image->red_crop[i - y1][j - x1] = image->red[i][j];
-				image->green_crop[i - y1][j - x1] = image->green[i][j];
-				image->blue_crop[i - y1][j - x1] = image->blue[i][j];
+		for (int i = *y1; i < *y2; i++)
+			for ( int j = *x1; j < *x2; j++) {
+				output_r[i - *y1][j - *x1] = image->red[i][j];
+				output_g[i - *y1][j - *x1] = image->green[i][j];
+				output_b[i - *y1][j - *x1] = image->blue[i][j];
 			}
-		}
-		printf("Selected %d %d %d %d\n", x1, y1, x2, y2);
-	}
-}
-
-void select_function_all(struct global_image *image,
-						 int *x1, int *y1, int *x2, int *y2)
-{
-	if (image->type[1] == '2' || image->type[1] == '5') {
-		free_matrix(image->y_axis, image->red_crop);
-		image->red_crop = alloc_matrix(image->height, image->width);
-		if (!image->red_crop) {
-			fprintf(stderr, "Alloc failed\n");
-			return;
-		}
-
-		image->x_axis = image->width;
-		image->y_axis = image->height;
-
-		for (int i = 0; i < image->height; i++)
-			for (int j = 0; j < image->width; j++)
-				image->red_crop[i][j] = image->red[i][j];
-
-		image->x_axis = image->width;
-		image->y_axis = image->height;
-
-		*x1 = 0; *y1 = 0; *x2 = image->width; *y2 = image->height;
-
-		printf("Selected ALL\n");
-	}
-	if (image->type[1] == '3' || image->type[1] == '6') {
-		free_matrix(image->y_axis, image->red_crop);
-		free_matrix(image->y_axis, image->green_crop);
-		free_matrix(image->y_axis, image->blue_crop);
-
-		image->red_crop = alloc_matrix(image->height, image->width);
-		image->blue_crop = alloc_matrix(image->height, image->width);
-		image->green_crop = alloc_matrix(image->height, image->width);
-
-		if (!image->red_crop) {
-			fprintf(stderr, "Alloc failed\n");
-			return;
-		}
-		if (!image->green_crop) {
-			free_matrix(image->height, image->red_crop);
-			fprintf(stderr, "Alloc failed\n");
-			return;
-		}
-		if (!image->blue_crop) {
-			free_matrix(image->height, image->red_crop);
-			free_matrix(image->height, image->green_crop);
-			fprintf(stderr, "Alloc failed\n");
-			return;
-		}
-
-		image->x_axis = image->width;
-		image->y_axis = image->height;
-
-		for (int  i = 0; i < image->height; i++) {
-			for (int j = 0; j < image->width; j++) {
-				image->red_crop[i][j] = image->red[i][j];
-				image->green_crop[i][j] = image->green[i][j];
-				image->blue_crop[i][j] = image->blue[i][j];
-			}
-		}
-
-		*x1 = 0; *y1 = 0; *x2 = image->width; *y2 = image->height;
-
-		printf("Selected ALL\n");
-	}
-}
-
-void crop_function(struct global_image *image)
-{
-	if (image->type[1] == '2' || image->type[1] == '5') {
-		free_matrix(image->height, image->red);
-
-		image->red = alloc_matrix(image->y_axis, image->x_axis);
-		if (!image->red) {
-			fprintf(stderr, "Alloc failed\n");
-			return;
-		}
-
-		image->width = image->x_axis;
-		image->height = image->y_axis;
-
-		for (int i = 0; i < image->y_axis; i++)
-			for (int j = 0; j < image->x_axis; j++)
-				image->red[i][j] = image->red_crop[i][j];
-	}
-	if (image->type[1] == '3' || image->type[1] == '6') {
-		free_matrix(image->height, image->red);
-		free_matrix(image->height, image->green);
-		free_matrix(image->height, image->blue);
-
-		image->red = alloc_matrix(image->y_axis, image->x_axis);
-		image->green = alloc_matrix(image->y_axis, image->x_axis);
-		image->blue = alloc_matrix(image->y_axis, image->x_axis);
-
-		if (!image->red) {
-			fprintf(stderr, "Alloc failed\n");
-			return;
-		}
-		if (!image->green) {
-			free_matrix(image->y_axis, image->red);
-			fprintf(stderr, "Alloc failed\n");
-			return;
-		}
-		if (!image->blue) {
-			free_matrix(image->y_axis, image->red);
-			free_matrix(image->y_axis, image->green);
-			fprintf(stderr, "Alloc failed\n");
-			return;
-		}
-
-		image->width = image->x_axis;
-		image->height = image->y_axis;
-
-		for (int i = 0; i < image->y_axis; i++) {
-			for (int j = 0; j < image->x_axis; j++) {
-				image->red[i][j] = image->red_crop[i][j];
-				image->green[i][j] = image->green_crop[i][j];
-				image->blue[i][j] = image->blue_crop[i][j];
-			}
-		}
+		
+		free_global_matrix(image);//aici
+		image->red = output_r;
+		image->blue = output_b;
+		image->green = output_g;
+		image->height = *y2 - *y1;
+		image->y_axis = *y2 - *y1;
+		image->width = *x2 - *x1;
+		image->x_axis = *x2 - *x1;
+		*x1 = 0;
+		*x2 = image->width;
+		*y1 = 0;
+		*y2 = image->height;
 	}
 
 	printf("Image cropped\n");

@@ -81,7 +81,7 @@ int file_type(FILE *fptr, char s[NMAX])
 int operation_identifier(int count, char s[NMAX],
 						 int *x1, int *y1, int *x2, int *y2, int *h1, int *h2,
 						 int *angle, char parametre[NMAX], char file[NMAX],
-						 int *type, struct global_image image)
+						 int *type, struct global_image *image)
 {
 	char string[NMAX], copy_string[NMAX];
 	fgets(string, NMAX, stdin);
@@ -155,7 +155,7 @@ int load_function_identifier(char string[NMAX], char s[NMAX])
 }
 
 int histogram_function_identifier(int count, char string[NMAX],
-								  struct global_image image, int *h1, int *h2)
+								  struct global_image *image, int *h1, int *h2)
 {
 	char *p = strtok(string, " ");
 	int contor = 0, ch1 = -1, ch2 = -1, ch3 = -1, ok = 0;
@@ -187,7 +187,7 @@ int histogram_function_identifier(int count, char string[NMAX],
 		printf("Invalid command\n");
 		return 0;
 	}
-	if (image.type[1] == '3' || image.type[1] == '6') {
+	if (image->type[1] == '3' || image->type[1] == '6') {
 		printf("Black and white image needed\n");
 		return 0;
 	}
@@ -201,7 +201,7 @@ int histogram_function_identifier(int count, char string[NMAX],
 }
 
 int save_function_identifier(char string[NMAX], char file[NMAX],
-							 int *type, struct global_image image)
+							 int *type, struct global_image *image)
 {
 	char *p = strtok(string, " ");
 	int ok = 0;
@@ -212,7 +212,7 @@ int save_function_identifier(char string[NMAX], char file[NMAX],
 		p = strtok(NULL, " ");
 	}
 
-	*type = image.type[1] - '0';
+	*type = image->type[1] - '0';
 	if (ok == 3) {
 		if (*type == 5) {
 			*type = 2;
@@ -236,7 +236,7 @@ int save_function_identifier(char string[NMAX], char file[NMAX],
 }
 
 int rotate_function_identifier(int count, char string[NMAX],
-							   struct global_image image, int *angle)
+							   struct global_image *image, int *angle)
 {
 	char *p = strtok(string, " ");
 	p = strtok(NULL, " ");
@@ -284,16 +284,10 @@ int rotate_function_identifier(int count, char string[NMAX],
 		return 0;
 	}
 
-	int count_select = 0, count_image = 0;
-	for (int i = 0; i < image.height; i++)
-		for (int j = 0; j < image.width; j++)
-			count_image++;
+	int count_select = image->height * image->width;
+	int count_image = image->x_axis * image->y_axis;
 
-	for (int i = 0; i < image.y_axis; i++)
-		for (int j = 0; j < image.x_axis; j++)
-			count_select++;
-
-	if (image.x_axis == image.y_axis)
+	if (image->x_axis == image->y_axis)
 		return 6;
 	if (count_image == count_select)
 		return 6;
@@ -302,11 +296,11 @@ int rotate_function_identifier(int count, char string[NMAX],
 	return 0;
 }
 
-int equalize_function_identifier(int count, struct global_image image)
+int equalize_function_identifier(int count, struct global_image *image)
 {
 	if (count == 0)
 		return 11;
-	if (image.type[1] == '3' || image.type[1] == '6') {
+	if (image->type[1] == '3' || image->type[1] == '6') {
 		printf("Black and white image needed\n");
 		return 0;
 	}
@@ -315,7 +309,7 @@ int equalize_function_identifier(int count, struct global_image image)
 
 int apply_function_identifier(int count, char string[NMAX],
 							  char parameter[NMAX],
-							  struct global_image image)
+							  struct global_image *image)
 {
 	if (count == 0)
 		return 11;
@@ -336,7 +330,7 @@ int apply_function_identifier(int count, char string[NMAX],
 		strcmp(parameter, "SHARPEN") == 0 ||
 	    strcmp(parameter, "BLUR") == 0 ||
 	    strcmp(parameter, "GAUSSIAN_BLUR") == 0) {
-		if (image.type[1] == '2' || image.type[1] == '5') {
+		if (image->type[1] == '2' || image->type[1] == '5') {
 			printf("Easy, Charlie Chaplin\n");
 			return 0;
 		}
@@ -350,7 +344,7 @@ int apply_function_identifier(int count, char string[NMAX],
 }
 
 int refurbished_select_identifier(int count, char string[NMAX],
-								  struct global_image image,
+								  struct global_image *image,
 								  int *x1, int *y1, int *x2, int *y2)
 {
 	if (count == 0)
@@ -359,8 +353,15 @@ int refurbished_select_identifier(int count, char string[NMAX],
 	char *p = strtok(string, " ");
 	int cpx1 = -1, cpx2 = -1, cpy1 = -1, cpy2 = -1;
 	p = strtok(NULL, " ");
-	if (strcmp(p, "ALL") == 0)
+	if (strcmp(p, "ALL") == 0) {
+		*x1 = 0;
+		*x2 = image->width;
+		*y1 = 0;
+		*y2 = image->height;
+		image->x_axis = *x2;
+		image->y_axis = *y2;
 		return 3;
+	}
 
 	int cnt = 0, nr = 0;
 	while (p) {
@@ -400,7 +401,7 @@ int refurbished_select_identifier(int count, char string[NMAX],
 	if (cpx1 < 0 || cpx2 < 0 || cpy1 < 0 || cpy2 < 0) {
 		printf("Invalid set of coordinates\n");
 		return 0;
-	} else if (cpx2 > image.width || cpy2 > image.height) {
+	} else if (cpx2 > image->width || cpy2 > image->height) {
 		printf("Invalid set of coordinates\n");
 		return 0;
 	} else if (cpx1 == cpx2 || cpy2 == cpy1) {
@@ -408,6 +409,7 @@ int refurbished_select_identifier(int count, char string[NMAX],
 		return 0;
 	}
 	*x1 = cpx1; *x2 = cpx2; *y1 = cpy1; *y2 = cpy2;
+	image->x_axis = *x2 - *x1; image->y_axis = *y2 - *y1;
 	return 2;
 
 	//return 0;
