@@ -11,7 +11,8 @@ int **alloc_matrix(int line, int coloumn);
 
 void free_global_matrix(struct global_image *image);
 
-void crop_function(struct global_image *image, int *x1, int *y1, int *x2, int *y2);
+void crop_function(struct global_image *image,
+				   int *x1, int *y1, int *x2, int *y2);
 
 void equalize_function(struct global_image *image);
 

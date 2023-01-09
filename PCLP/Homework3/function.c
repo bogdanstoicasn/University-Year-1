@@ -10,10 +10,11 @@
 
 struct global_image {
 	char type[3];
-	int width, height, max_value, x_axis, y_axis;
-	int **red, **red_crop;
-	int **green, **green_crop;
-	int **blue, **blue_crop;
+	int width, height;
+	int max_value, x_axis, y_axis;
+	int **red;
+	int **green;
+	int **blue;
 };
 
 // Function to ignore any comments
@@ -91,18 +92,19 @@ void free_global_matrix(struct global_image *image)
 	}
 }
 
-void crop_function(struct global_image *image, int *x1, int *y1, int *x2, int *y2)
+void crop_function(struct global_image *image,
+				   int *x1, int *y1, int *x2, int *y2)
 {
 	if (image->type[1] == '2' || image->type[1] == '5') {
-		int **output=alloc_matrix(*y2 - *y1, *x2 - *x1);
+		int **output = alloc_matrix(*y2 - *y1, *x2 - *x1);
 		if (!output) {
 			fprintf(stderr, "Failed to crop\n");
 			return;
 		}
 		for (int i = *y1; i < *y2; i++)
-			for ( int j=*x1; j < *x2; j++)
+			for (int j = *x1; j < *x2; j++)
 				output[i - *y1][j - *x1] = image->red[i][j];
-		
+
 		free_global_matrix(image);
 		image->height = *y2 - *y1;
 		image->y_axis = *y2 - *y1;
@@ -134,13 +136,13 @@ void crop_function(struct global_image *image, int *x1, int *y1, int *x2, int *y
 			return;
 		}
 		for (int i = *y1; i < *y2; i++)
-			for ( int j = *x1; j < *x2; j++) {
+			for (int j = *x1; j < *x2; j++) {
 				output_r[i - *y1][j - *x1] = image->red[i][j];
 				output_g[i - *y1][j - *x1] = image->green[i][j];
 				output_b[i - *y1][j - *x1] = image->blue[i][j];
 			}
-		
-		free_global_matrix(image);//aici
+
+		free_global_matrix(image);
 		image->red = output_r;
 		image->blue = output_b;
 		image->green = output_g;

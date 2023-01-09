@@ -6,10 +6,11 @@
 
 struct global_image {
 	char type[3];
-	int width, height, max_value, x_axis, y_axis;
-	int **red, **red_crop;
-	int **green, **green_crop;
-	int **blue, **blue_crop;
+	int width, height;
+	int max_value, x_axis, y_axis;
+	int **red;
+	int **green;
+	int **blue;
 };
 
 void file_printer_for_tests(int *type, char file[NMAX],

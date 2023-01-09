@@ -4,39 +4,46 @@
 #include "function.h"
 #include "rotate.h"
 #define NMAX 50
+
 struct global_image {
 	char type[3];
-	int width, height, max_value, x_axis, y_axis;
-	int **red, **red_crop;
-	int **green, **green_crop;
-	int **blue, **blue_crop;
+	int width, height;
+	int max_value, x_axis, y_axis;
+	int **red;
+	int **green;
+	int **blue;
+};
+
+struct temporary {
+	int x1, x2, y1, y2;
 };
 
 // we rotate by type and angle with switch
 void rotate_function_helper(struct global_image *image, int angle,
-							int *x1, int *y1, int *x2, int *y2)
+							int *x1, int *y1, int *x2, int *y2,
+							struct temporary coord)
 {
 	if (image->type[1] == '2' || image->type[1] == '5') {
 		switch (angle) {
 		case 90:
-			clockwise_rotation_90(image, x1, y1, x2, y2);
+			clockwise_rotation_90(image, x1, y1, x2, y2, coord);
 			printf("Rotated 90\n"); break;
 		case -90:
-			counter_clockwise_rotation_90(image, x1, y1, x2, y2);
+			counter_clockwise_rotation_90(image, x1, y1, x2, y2, coord);
 			printf("Rotated -90\n"); break;
 		case 180:
-			clockwise_rotation_90(image, x1, y1, x2, y2);
-			clockwise_rotation_90(image, x1, y1, x2, y2);
+			clockwise_rotation_90(image, x1, y1, x2, y2, coord);
+			clockwise_rotation_90(image, x1, y1, x2, y2, coord);
 			printf("Rotated 180\n"); break;
 		case -180:
-			counter_clockwise_rotation_90(image, x1, y1, x2, y2);
-			counter_clockwise_rotation_90(image, x1, y1, x2, y2);
+			counter_clockwise_rotation_90(image, x1, y1, x2, y2, coord);
+			counter_clockwise_rotation_90(image, x1, y1, x2, y2, coord);
 			printf("Rotated -180\n"); break;
 		case 270:
-			counter_clockwise_rotation_90(image, x1, y1, x2, y2);
+			counter_clockwise_rotation_90(image, x1, y1, x2, y2, coord);
 			printf("Rotated 270\n"); break;
 		case -270:
-			clockwise_rotation_90(image, x1, y1, x2, y2);
+			clockwise_rotation_90(image, x1, y1, x2, y2, coord);
 			printf("Rotated -270\n"); break;
 		case 360:
 			printf("Rotated 360\n"); break;
@@ -51,24 +58,24 @@ void rotate_function_helper(struct global_image *image, int angle,
 	if (image->type[1] == '3' || image->type[1] == '6') {
 		switch (angle) {
 		case 90:
-			clockwise_rotation_90_color(image, x1, y1, x2, y2);
+			clockwise_rotation_90_color(image, x1, y1, x2, y2, coord);
 			printf("Rotated 90\n"); break;
 		case -90:
-			counter_clockwise_rotation_90_color(image, x1, y1, x2, y2);
+			counter_clockwise_rotation_90_color(image, x1, y1, x2, y2, coord);
 			printf("Rotated -90\n"); break;
 		case 180:
-			clockwise_rotation_90_color(image, x1, y1, x2, y2);
-			clockwise_rotation_90_color(image, x1, y1, x2, y2);
+			clockwise_rotation_90_color(image, x1, y1, x2, y2, coord);
+			clockwise_rotation_90_color(image, x1, y1, x2, y2, coord);
 			printf("Rotated 180\n"); break;
 		case -180:
-			counter_clockwise_rotation_90_color(image, x1, y1, x2, y2);
-			counter_clockwise_rotation_90_color(image, x1, y1, x2, y2);
+			counter_clockwise_rotation_90_color(image, x1, y1, x2, y2, coord);
+			counter_clockwise_rotation_90_color(image, x1, y1, x2, y2, coord);
 			printf("Rotated -180\n"); break;
 		case 270:
-			counter_clockwise_rotation_90_color(image, x1, y1, x2, y2);
+			counter_clockwise_rotation_90_color(image, x1, y1, x2, y2, coord);
 			printf("Rotated 270\n"); break;
 		case -270:
-			clockwise_rotation_90_color(image, x1, y1, x2, y2);
+			clockwise_rotation_90_color(image, x1, y1, x2, y2, coord);
 			printf("Rotated -270\n"); break;
 		case 360:
 			printf("Rotated 360\n"); break;
@@ -85,7 +92,8 @@ void rotate_function_helper(struct global_image *image, int angle,
 
 // both rotations are done and they work as intended
 void counter_clockwise_rotation_90(struct global_image *image,
-								   int *x1, int *y1, int *x2, int *y2)
+								   int *x1, int *y1, int *x2, int *y2,
+								   struct temporary coord)
 {
 	//we do the rotation in the alloc bellow then
 	// we link with the image matrix
@@ -96,12 +104,21 @@ void counter_clockwise_rotation_90(struct global_image *image,
 	}
 	for (int i = 0; i < image->y_axis; i++)
 		for (int j = 0; j < image->x_axis; j++)
-			output[image->x_axis - j - 1][i] = image->red[i + *y1][j + *x1];
+			output[image->x_axis - j - 1][i] =
+				image->red[i + coord.y1][j + coord.x1];
 
 	int tmp = image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
 
+	int aux = *x1;
+	*x1 = *y1;
+	*y1 = aux;
+
+	int change = *x2;
+	*x2 = *y2;
+	*y2 = change;
+
 	int count_image = image->width * image->height;
 	int count_select = image->x_axis * image->y_axis;
 
@@ -120,15 +137,16 @@ void counter_clockwise_rotation_90(struct global_image *image,
 				image->red[i][j] = output[i][j];
 
 	} else {
-		for (int i = *y1; i < *y2; i++)
-			for (int j = *x1; j < *x2; j++)
-				image->red[i][j] = output[i - *y1][j - *x1];
+		for (int i = coord.y1; i < coord.y2; i++)
+			for (int j = coord.x1; j < coord.x2; j++)
+				image->red[i][j] = output[i - coord.y1][j - coord.x1];
 	}
 	free_matrix(image->y_axis, output);
 }
 
 void clockwise_rotation_90(struct global_image *image,
-						   int *x1, int *y1, int *x2, int *y2)
+						   int *x1, int *y1, int *x2, int *y2,
+						   struct temporary coord)
 {
 	//we do the rotation in the alloc bellow then
 	// we link with the image matrix
@@ -139,11 +157,20 @@ void clockwise_rotation_90(struct global_image *image,
 	}
 	for (int i = 0; i < image->y_axis; i++)
 		for (int j = 0; j < image->x_axis; j++)
-			output[j][image->y_axis - 1 - i] = image->red[i + *y1][j + *x1];
+			output[j][image->y_axis - 1 - i] =
+				image->red[i + coord.y1][j + coord.x1];
 
-	int tmp=image->x_axis;
+	int tmp = image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
+
+	int aux = *x1;
+	*x1 = *y1;
+	*y1 = aux;
+
+	int change = *x2;
+	*x2 = *y2;
+	*y2 = change;
 
 	int count_image = image->width * image->height;
 	int count_select = image->x_axis * image->y_axis;
@@ -162,18 +189,18 @@ void clockwise_rotation_90(struct global_image *image,
 			for (int j = 0; j < image->width; j++)
 				image->red[i][j] = output[i][j];
 	} else {
-		for (int i = *y1; i < *y2; i++)
-			for (int j = *x1; j < *x2; j++)
-				image->red[i][j] = output[i - *y1][j - *x1];
+		for (int i = coord.y1; i < coord.y2; i++)
+			for (int j = coord.x1; j < coord.x2; j++)
+				image->red[i][j] = output[i - coord.y1][j - coord.x1];
 	}
 	free_matrix(image->y_axis, output);
 }
 
 void counter_clockwise_rotation_90_color(struct global_image *image,
-										 int *x1, int *y1, int *x2, int *y2)
+										 int *x1, int *y1, int *x2, int *y2,
+										 struct temporary coord)
 {
-	//we do the rotation in the alloc bellow then
-	// we link with the image matrix
+	//we do the rotation in the alloc bellow then we put them numbers in image
 	int **output = alloc_matrix(image->x_axis, image->y_axis);
 	int **output_b = alloc_matrix(image->x_axis, image->y_axis);
 	int **output_g = alloc_matrix(image->x_axis, image->y_axis);
@@ -194,14 +221,25 @@ void counter_clockwise_rotation_90_color(struct global_image *image,
 	}
 	for (int i = 0; i < image->y_axis; i++)
 		for (int j = 0; j < image->x_axis; j++) {
-			output[image->x_axis - j - 1][i] = image->red[i + *y1][j + *x1];
-			output_b[image->x_axis - j - 1][i] = image->blue[i + *y1][j + *x1];
-			output_g[image->x_axis - j - 1][i] = image->green[i + *y1][j + *x1];
+			output[image->x_axis - j - 1][i] =
+				image->red[i + coord.y1][j + coord.x1];
+			output_b[image->x_axis - j - 1][i] =
+				image->blue[i + coord.y1][j + coord.x1];
+			output_g[image->x_axis - j - 1][i] =
+				image->green[i + coord.y1][j + coord.x1];
 		}
 
-	int tmp=image->x_axis;
+	int tmp = image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
+
+	int aux = *x1;
+	*x1 = *y1;
+	*y1 = aux;
+
+	int change = *x2;
+	*x2 = *y2;
+	*y2 = change;
 
 	int count_image = image->width * image->height;
 	int count_select = image->x_axis * image->y_axis;
@@ -227,11 +265,11 @@ void counter_clockwise_rotation_90_color(struct global_image *image,
 				image->green[i][j] = output_g[i][j];
 			}
 	} else {
-		for (int i = *y1; i < *y2; i++) {
-			for (int j = *x1; j < *x2; j++) {
-				image->red[i][j] = output[i - *y1][j - *x1];
-				image->blue[i][j] = output_b[i - *y1][j - *x1];
-				image->green[i][j] = output_g[i - *y1][j - *x1];
+		for (int i = coord.y1; i < coord.y2; i++) {
+			for (int j = coord.x1; j < coord.x2; j++) {
+				image->red[i][j] = output[i - coord.y1][j - coord.x1];
+				image->blue[i][j] = output_b[i - coord.y1][j - coord.x1];
+				image->green[i][j] = output_g[i - coord.y1][j - coord.x1];
 			}
 		}
 	}
@@ -241,10 +279,10 @@ void counter_clockwise_rotation_90_color(struct global_image *image,
 }
 
 void clockwise_rotation_90_color(struct global_image *image,
-								 int *x1, int *y1, int *x2, int *y2)
+								 int *x1, int *y1, int *x2, int *y2,
+								 struct temporary coord)
 {
-	//we do the rotation in the alloc bellow then
-	// we link with the image matrix
+	//we do the rotation in the alloc bellow then we put them numbers in image
 	int **output = alloc_matrix(image->x_axis, image->y_axis);
 	int **output_b = alloc_matrix(image->x_axis, image->y_axis);
 	int **output_g = alloc_matrix(image->x_axis, image->y_axis);
@@ -265,14 +303,23 @@ void clockwise_rotation_90_color(struct global_image *image,
 	}
 	for (int i = 0; i < image->y_axis; i++)
 		for (int j = 0; j < image->x_axis; j++) {
-			output[j][image->y_axis - 1 - i] = image->red[i + *y1][j + *x1];
-			output_b[j][image->y_axis - 1 - i] = image->blue[i + *y1][j + *x1];
-			output_g[j][image->y_axis - 1 - i] = image->green[i + *y1][j + *x1];
+			output[j][image->y_axis - 1 - i] =
+				image->red[i + coord.y1][j + coord.x1];
+			output_b[j][image->y_axis - 1 - i] =
+				image->blue[i + coord.y1][j + coord.x1];
+			output_g[j][image->y_axis - 1 - i] =
+				image->green[i + coord.y1][j + coord.x1];
 		}
-
-	int tmp=image->x_axis;
+	//swapp select and basically rows and cols
+	int tmp = image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
+	int aux = *x1;
+	*x1 = *y1;
+	*y1 = aux;
+	int change = *x2;
+	*x2 = *y2;
+	*y2 = change;
 
 	int count_image = image->width * image->height;
 	int count_select = image->x_axis * image->y_axis;
@@ -298,11 +345,11 @@ void clockwise_rotation_90_color(struct global_image *image,
 				image->green[i][j] = output_g[i][j];
 			}
 	} else {
-		for (int i = *y1; i < *y2; i++) {
-			for (int j = *x1; j < *x2; j++) {
-				image->red[i][j] = output[i - *y1][j - *x1];
-				image->blue[i][j] = output_b[i - *y1][j - *x1];
-				image->green[i][j] = output_g[i - *y1][j - *x1];
+		for (int i = coord.y1; i < coord.y2; i++) {
+			for (int j = coord.x1; j < coord.x2; j++) {
+				image->red[i][j] = output[i - coord.y1][j - coord.x1];
+				image->blue[i][j] = output_b[i - coord.y1][j - coord.x1];
+				image->green[i][j] = output_g[i - coord.y1][j - coord.x1];
 			}
 		}
 	}

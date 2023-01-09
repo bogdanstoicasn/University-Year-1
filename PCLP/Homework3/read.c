@@ -10,10 +10,11 @@
 
 struct global_image {
 	char type[3];
-	int width, height, max_value, x_axis, y_axis;
-	int **red, **red_crop;
-	int **green, **green_crop;
-	int **blue, **blue_crop;
+	int width, height;
+	int max_value, x_axis, y_axis;
+	int **red;
+	int **green;
+	int **blue;
 };
 
 void file_reader_first_version(int *count, char s[NMAX], int type,
@@ -207,7 +208,6 @@ void binary_file_reader_ppm_edition(char s[NMAX], FILE *fptr,
 	image->red = alloc_matrix(image->height, image->width);
 	image->green = alloc_matrix(image->height, image->width);
 	image->blue = alloc_matrix(image->height, image->width);
-
 
 	if (!image->red || !image->green || !image->blue) {
 		printf("Failed to alloc for %s\n", s);

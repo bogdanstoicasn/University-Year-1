@@ -12,16 +12,30 @@
 
 struct global_image {
 	char type[3];
-	int width, height, max_value, x_axis, y_axis;
-	int **red, **red_crop;
-	int **green, **green_crop;
-	int **blue, **blue_crop;
+	int width, height;
+	int max_value, x_axis, y_axis;
+	int **red;
+	int **green;
+	int **blue;
 };
+
+struct temporary {
+	int x1, x2, y1, y2;
+};
+
+void assign(struct temporary *coord, int x1, int y1, int x2, int y2)
+{
+	coord->x1 = x1;
+	coord->y1 = y1;
+	coord->x2 = x2;
+	coord->y2 = y2;
+}
 
 int main(void)
 {
 	char name_of_file[NMAX], parameter[NMAX], file[NMAX];
 	struct global_image image;
+	struct temporary coord;
 	int file_type_determine = 0, type, h1_stars = 0, h2_bins = 0;
 	int angle = 0, count = 0;
 	int x1, x2, y1, y2;
@@ -57,7 +71,8 @@ int main(void)
 			equalize_function(&image);
 			break;
 		case 6:
-			rotate_function_helper(&image, angle, &x1, &y1, &x2, &y2);
+			assign(&coord, x1, y1, x2, y2);
+			rotate_function_helper(&image, angle, &x1, &y1, &x2, &y2, coord);
 			break;
 		case 7:
 			crop_function(&image, &x1, &y1, &x2, &y2);

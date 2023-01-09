@@ -10,10 +10,11 @@
 
 struct global_image {
 	char type[3];
-	int width, height, max_value, x_axis, y_axis;
-	int **red, **red_crop;
-	int **green, **green_crop;
-	int **blue, **blue_crop;
+	int width, height;
+	int max_value, x_axis, y_axis;
+	int **red;
+	int **green;
+	int **blue;
 };
 
 int **kernel_matrixes_creator(char parameter[NMAX])
@@ -95,7 +96,7 @@ void apply_kernel(struct global_image *image, int x1, int y1, int x2, int y2,
 
 	if (!output_r) {
 		free_matrix(y2 - y1, output_r);
-		free_matrix(y2 - y1,output_g);
+		free_matrix(y2 - y1, output_g);
 		printf("Failed to APPLY\n");
 		return;
 	}
@@ -147,9 +148,9 @@ void apply_kernel(struct global_image *image, int x1, int y1, int x2, int y2,
 	}
 	// free the resources my boy
 	free_matrix(3, kernel);
-	free_matrix(y2 - y1,output_b);
-	free_matrix(y2 - y1,output_r);
-	free_matrix(y2 - y1,output_g);
+	free_matrix(y2 - y1, output_b);
+	free_matrix(y2 - y1, output_r);
+	free_matrix(y2 - y1, output_g);
 }
 
 void kernel_interface_helper(struct global_image *image, char parameter[NMAX],
