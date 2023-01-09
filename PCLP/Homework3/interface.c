@@ -62,20 +62,16 @@ int file_type(FILE *fptr, char s[NMAX])
 	}
 	switch (determine_type[1]) {
 	case '2':
-		//fseek(fptr,0,0);
-		//fclose(fptr);
+		fclose(fptr);
 		return 2;
 	case '3':
-		//fseek(fptr,0,0);
-		//fclose(fptr);
+		fclose(fptr);
 		return 3;
 	case '5':
-		//fseek(fptr,0,0);
-		//fclose(fptr);
+		fclose(fptr);
 		return 5;
 	case '6':
-		//fseek(fptr,0,0);
-		//fclose(fptr);
+		fclose(fptr);
 		return 6;
 	}
 	fclose(fptr);
