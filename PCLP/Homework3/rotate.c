@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "function.h"
 #include "rotate.h"
+
 #define NMAX 50
 
 struct global_image {
@@ -90,13 +91,14 @@ void rotate_function_helper(struct global_image *image, int angle,
 	}
 }
 
-// both rotations are done and they work as intended
+// rotate -90 degrees PGM image
 void counter_clockwise_rotation_90(struct global_image *image,
 								   int *x1, int *y1, int *x2, int *y2,
 								   struct temporary coord)
 {
-	//we do the rotation in the alloc bellow then
-	// we link with the image matrix
+	// we do the rotation in the alloc bellow then
+	// if rotate all image => we create new matrix for it
+	// else we just put the rotated selection in it's place
 	int **output = alloc_matrix(image->x_axis, image->y_axis);
 	if (!output) {
 		printf("Failed to rotate\n");
@@ -111,6 +113,7 @@ void counter_clockwise_rotation_90(struct global_image *image,
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
 
+	// necessary when all the image is rotated
 	int aux = *x1;
 	*x1 = *y1;
 	*y1 = aux;
@@ -122,7 +125,7 @@ void counter_clockwise_rotation_90(struct global_image *image,
 	int count_image = image->width * image->height;
 	int count_select = image->x_axis * image->y_axis;
 
-	// check if all image or selection the count_select and count_image
+	// check if all image or selection with count_select and count_image
 	if (count_image == count_select) {
 		free_matrix(image->height, image->red);
 
@@ -144,12 +147,14 @@ void counter_clockwise_rotation_90(struct global_image *image,
 	free_matrix(image->y_axis, output);
 }
 
+// rotate 90 degrees PGM image
 void clockwise_rotation_90(struct global_image *image,
 						   int *x1, int *y1, int *x2, int *y2,
 						   struct temporary coord)
 {
-	//we do the rotation in the alloc bellow then
-	// we link with the image matrix
+	// we do the rotation in the alloc bellow then
+	// if rotate all image => we create new matrix for it
+	// else we just put the rotated selection in it's place
 	int **output = alloc_matrix(image->x_axis, image->y_axis);
 	if (!output) {
 		printf("Failed to rotate\n");
@@ -164,6 +169,7 @@ void clockwise_rotation_90(struct global_image *image,
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
 
+	// necessary when all the image is rotated
 	int aux = *x1;
 	*x1 = *y1;
 	*y1 = aux;
@@ -175,7 +181,7 @@ void clockwise_rotation_90(struct global_image *image,
 	int count_image = image->width * image->height;
 	int count_select = image->x_axis * image->y_axis;
 
-	// check if all image or selection the count_select and count_image
+	// check if all image or selection with count_select and count_image
 	if (count_image == count_select) {
 		free_matrix(image->height, image->red);
 
@@ -196,11 +202,12 @@ void clockwise_rotation_90(struct global_image *image,
 	free_matrix(image->y_axis, output);
 }
 
+// rotate -90 degrees PPM image
 void counter_clockwise_rotation_90_color(struct global_image *image,
 										 int *x1, int *y1, int *x2, int *y2,
 										 struct temporary coord)
 {
-	//we do the rotation in the alloc bellow then we put them numbers in image
+	// we do the rotation in the alloc bellow
 	int **output = alloc_matrix(image->x_axis, image->y_axis);
 	int **output_b = alloc_matrix(image->x_axis, image->y_axis);
 	int **output_g = alloc_matrix(image->x_axis, image->y_axis);
@@ -228,11 +235,11 @@ void counter_clockwise_rotation_90_color(struct global_image *image,
 			output_g[image->x_axis - j - 1][i] =
 				image->green[i + coord.y1][j + coord.x1];
 		}
-
 	int tmp = image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
 
+	// necessary when all the image is rotated
 	int aux = *x1;
 	*x1 = *y1;
 	*y1 = aux;
@@ -278,11 +285,12 @@ void counter_clockwise_rotation_90_color(struct global_image *image,
 	free_matrix(image->y_axis, output_g);
 }
 
+// rotate 90 degrees PPM image
 void clockwise_rotation_90_color(struct global_image *image,
 								 int *x1, int *y1, int *x2, int *y2,
 								 struct temporary coord)
 {
-	//we do the rotation in the alloc bellow then we put them numbers in image
+	// we do the rotation in the alloc bellow
 	int **output = alloc_matrix(image->x_axis, image->y_axis);
 	int **output_b = alloc_matrix(image->x_axis, image->y_axis);
 	int **output_g = alloc_matrix(image->x_axis, image->y_axis);
@@ -310,13 +318,15 @@ void clockwise_rotation_90_color(struct global_image *image,
 			output_g[j][image->y_axis - 1 - i] =
 				image->green[i + coord.y1][j + coord.x1];
 		}
-	//swapp select and basically rows and cols
 	int tmp = image->x_axis;
 	image->x_axis = image->y_axis;
 	image->y_axis = tmp;
+
+	// necessary when all image is rotated
 	int aux = *x1;
 	*x1 = *y1;
 	*y1 = aux;
+
 	int change = *x2;
 	*x2 = *y2;
 	*y2 = change;

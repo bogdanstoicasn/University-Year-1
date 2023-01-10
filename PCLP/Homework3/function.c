@@ -1,3 +1,4 @@
+/// Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -7,6 +8,8 @@
 #include "interface.h"
 
 #define NMAX 50
+#define MAX_UP 255
+#define MIN_DOWN 0
 
 struct global_image {
 	char type[3];
@@ -17,8 +20,7 @@ struct global_image {
 	int **blue;
 };
 
-// Function to ignore any comments
-// in file
+// max of 2 nuumbers
 int max_of_numbers(int a, int b)
 {
 	if (a > b)
@@ -27,6 +29,7 @@ int max_of_numbers(int a, int b)
 		return b;
 }
 
+// swap 2 numbers if first is bigger
 void swap_function(int *a, int *b)
 {
 	if (*a > *b) {
@@ -36,6 +39,7 @@ void swap_function(int *a, int *b)
 	}
 }
 
+// alloc matrix with defensive programming
 int **alloc_matrix(int line, int coloumn)
 {
 	int **a = (int **)malloc(line * sizeof(int *));
@@ -56,6 +60,7 @@ int **alloc_matrix(int line, int coloumn)
 	return a;
 }
 
+// freeing the allocated matrix
 void free_matrix(int line, int **matrix)
 {
 	for (int i = 0; i < line; i++)
@@ -92,6 +97,7 @@ void free_global_matrix(struct global_image *image)
 	}
 }
 
+// crop function with coordinates: x1->x2, y1->y2
 void crop_function(struct global_image *image,
 				   int *x1, int *y1, int *x2, int *y2)
 {
@@ -159,36 +165,39 @@ void crop_function(struct global_image *image,
 	printf("Image cropped\n");
 }
 
+// histogram calculated with bins and stars
 void histogram_function(struct global_image image, int h1_star, int h2_bins)
 {
 	int i, j;
-	long long *histogram_map = NULL, max_frequency = 0;
-	histogram_map = calloc(h2_bins, sizeof(long long));
+	int *histogram_map = NULL, max_frequency = 0;
+	histogram_map = calloc(h2_bins, sizeof(int));
 	if (!histogram_map) {
 		printf("Alloc failed\n");
 		return;
 	}
-	int step = (image.max_value + 1) / h2_bins;
+
+	int interval = (image.max_value + 1) / h2_bins;
 	for (i = 0; i < image.height; i++)
 		for (j = 0; j < image.width; j++)
-			histogram_map[image.red[i][j] / step]++;
+			histogram_map[image.red[i][j] / interval]++;
 
 	for (i = 0; i < h2_bins; i++)
 		if (histogram_map[i] > max_frequency)
 			max_frequency = histogram_map[i];
 
 	for (i = 0; i < h2_bins; i++) {
-		double length_of_star = (histogram_map[i] * h1_star / max_frequency);
+		double length_of_stars = (histogram_map[i] * h1_star / max_frequency);
 
-		printf("%d\t|\t", (int)length_of_star);
+		printf("%d\t|\t", (int)length_of_stars);
 
-		for (j = 0; j < ceil(length_of_star); j++)
+		for (j = 0; j < ceil(length_of_stars); j++)
 			printf("*");
 		printf("\n");
 	}
 	free(histogram_map);
 }
 
+// equalize function
 void equalize_function(struct global_image *image)
 {
 	int *frequency = calloc(256, sizeof(int));
@@ -198,6 +207,8 @@ void equalize_function(struct global_image *image)
 		printf("Alloc failed\n");
 		return;
 	}
+
+	// frequency
 	for (int i = 0; i < image->height; i++)
 		for (int j = 0; j < image->width; j++)
 			frequency[(image->red[i][j])]++;
@@ -212,10 +223,10 @@ void equalize_function(struct global_image *image)
 			final_result = 255 * 1.00000 *  (sum / area);
 
 			image->red[i][j] = round(final_result);
-			if (image->red[i][j] > 255)
-				image->red[i][j] = 255;
-			if (image->red[i][j] < 0)
-				image->red[i][j] = 0;
+			if (image->red[i][j] > MAX_UP)
+				image->red[i][j] = MAX_UP;
+			if (image->red[i][j] < MIN_DOWN)
+				image->red[i][j] = MIN_DOWN;
 		}
 	}
 	free(frequency);

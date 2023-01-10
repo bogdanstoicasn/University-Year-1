@@ -13,6 +13,9 @@ struct global_image {
 	int **blue;
 };
 
+// save function
+// it gets the name of file in "file" and the type in "type"
+// save accordingly
 void file_printer_for_tests(int *type, char file[NMAX],
 							struct global_image image)
 {
@@ -21,24 +24,27 @@ void file_printer_for_tests(int *type, char file[NMAX],
 		output = fopen(file, "wt");
 	else
 		output = fopen(file, "wb");
+
 	switch (*type) {
 	case 2:
 		fprintf(output, "P2\n%d %d\n%d\n", image.width,
 				image.height, image.max_value);
+
 		for (int i = 0; i < image.height; i++) {
 			for (int j = 0; j < image.width; j++) {
 				fprintf(output, "%d", image.red[i][j]);
+
 				if (j < image.width - 1)
 					fprintf(output, " ");
 			}
 			fprintf(output, "\n");
 		}
-
 		printf("Saved %s\n", file);
 		break;
 	case 3:
 		fprintf(output, "P3\n%d %d\n%d\n", image.width,
 				image.height, image.max_value);
+
 		for (int i = 0; i < image.height; i++) {
 			for (int j = 0; j < image.width; j++) {
 				fprintf(output, "%d %d %d ", image.red[i][j],
@@ -46,12 +52,12 @@ void file_printer_for_tests(int *type, char file[NMAX],
 			}
 			fprintf(output, "\n");
 		}
-
 		printf("Saved %s\n", file);
 		break;
 	case 5:
 		fprintf(output, "P5\n%d %d\n%d\n", image.width,
 				image.height, image.max_value);
+
 		for (int i = 0; i < image.height; i++) {
 			for (int j = 0; j < image.width; j++) {
 				unsigned char c = (unsigned char)image.red[i][j];
@@ -63,6 +69,7 @@ void file_printer_for_tests(int *type, char file[NMAX],
 	case 6:
 		fprintf(output, "P6\n%d %d\n%d\n", image.width,
 				image.height, image.max_value);
+
 		for (int i = 0; i < image.height; i++) {
 			for (int j = 0; j < image.width; j++) {
 				unsigned char c = (unsigned char)image.red[i][j];

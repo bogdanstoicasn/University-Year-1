@@ -39,7 +39,6 @@ void ignore_comments(FILE *fp)
 }
 
 // discovers the photo type
-// working as intended
 int file_type(FILE *fptr, char s[NMAX])
 {
 	char determine_type[3];
@@ -48,6 +47,7 @@ int file_type(FILE *fptr, char s[NMAX])
 		printf("Failed to load %s\n", s);
 		return 0;
 	}
+
 	ignore_comments(fptr);
 	fscanf(fptr, "%s", determine_type);
 	if (determine_type[0] != 'P') {
@@ -55,30 +55,29 @@ int file_type(FILE *fptr, char s[NMAX])
 		printf("Failed to load %s\n", s);
 		return 0;
 	}
+
 	if (determine_type[1] >= '7' || determine_type[1] <= '1' ||
 		determine_type[1] == '4' || determine_type[2] != 0) {
 		fclose(fptr);
 		printf("Failed to load %s\n", s);
 		return 0;
 	}
+	fclose(fptr);
+
 	switch (determine_type[1]) {
 	case '2':
-		fclose(fptr);
 		return 2;
 	case '3':
-		fclose(fptr);
 		return 3;
 	case '5':
-		fclose(fptr);
 		return 5;
 	case '6':
-		fclose(fptr);
 		return 6;
 	}
-	fclose(fptr);
 	return 0;
 }
 
+// identifies the command and saves the paramaters or returns other outputs
 int operation_identifier(int count, char s[NMAX],
 						 int *x1, int *y1, int *x2, int *y2, int *h1, int *h2,
 						 int *angle, char parametre[NMAX], char file[NMAX],
@@ -90,36 +89,42 @@ int operation_identifier(int count, char s[NMAX],
 		if (string[i] == '\n')
 			string[i] = '\0';
 
+	if (strlen(string) == 0)
+		return 0;
+
 	strcpy(copy_string, string);
 
 	char *p = strtok(string, " ");
 
-	///load
+	// load
 	if (strcmp(p, "LOAD") == 0)
 		return load_function_identifier(copy_string, s);
 
-	/// select + we use select_function_identifier
+	// select + we use select_function_identifier
 	if (strcmp(p, "SELECT") == 0)
 		return refurbished_select_identifier(count, copy_string, image,
 											 x1, y1, x2, y2);
 
-	///histogram + we use histogram_function_identifier
+	// histogram + we use histogram_function_identifier
 	if (strcmp(p, "HISTOGRAM") == 0)
 		return histogram_function_identifier(count, copy_string, image, h1, h2);
 
+	// rotate + we use rotate_function_identifier
 	if (strcmp(p, "ROTATE") == 0)
 		return rotate_function_identifier(count, copy_string, image, angle);
 
+	// equalize + we use equalie_function_identifier
 	if (strcmp(p, "EQUALIZE") == 0)
 		return equalize_function_identifier(count, image);
 
-	/// crop
+	// crop
 	if (strcmp(p, "CROP") == 0) {
 		if (count == 0)
 			return 11;
 		return 7;
 	}
 
+	// apply + we use apply_function_identifier
 	if (strcmp(p, "APPLY") == 0)
 		return apply_function_identifier(count, copy_string, parametre, image);
 
@@ -138,6 +143,7 @@ int operation_identifier(int count, char s[NMAX],
 	return 0;
 }
 
+// determines if operation is load
 int load_function_identifier(char string[NMAX], char s[NMAX])
 {
 	char *p = strtok(string, " ");
@@ -155,6 +161,7 @@ int load_function_identifier(char string[NMAX], char s[NMAX])
 	return 1;
 }
 
+// determines if operation is histogram and then the parameters
 int histogram_function_identifier(int count, char string[NMAX],
 								  struct global_image *image, int *h1, int *h2)
 {
@@ -201,19 +208,30 @@ int histogram_function_identifier(int count, char string[NMAX],
 	return 4;
 }
 
+// determines if operation is save and then the parameters
 int save_function_identifier(char string[NMAX], char file[NMAX],
 							 int *type, struct global_image *image)
 {
-	char *p = strtok(string, " ");
+	char *p = strtok(string, " "), ascii[NMAX];
 	int ok = 0;
 	while (p) {
 		ok++;
 		if (ok == 2)
 			strcpy(file, p);
+		if (ok == 3)
+			strcpy(ascii, p);
 		p = strtok(NULL, " ");
 	}
 
 	*type = image->type[1] - '0';
+	if (ok == 1) {
+		printf("Invalid command\n");
+		return 0;
+	}
+	if (ok == 3 && strcmp(ascii, "ascii") != 0) {
+		printf("Invalid command\n");
+		return 0;
+	}
 	if (ok == 3) {
 		if (*type == 5) {
 			*type = 2;
@@ -236,6 +254,7 @@ int save_function_identifier(char string[NMAX], char file[NMAX],
 	return 9;
 }
 
+// determines if operation is rotate and then the parameters
 int rotate_function_identifier(int count, char string[NMAX],
 							   struct global_image *image, int *angle)
 {
@@ -297,6 +316,7 @@ int rotate_function_identifier(int count, char string[NMAX],
 	return 0;
 }
 
+// determine if operation is equalize
 int equalize_function_identifier(int count, struct global_image *image)
 {
 	if (count == 0)
@@ -308,6 +328,7 @@ int equalize_function_identifier(int count, struct global_image *image)
 	return 5;
 }
 
+// determine if operation is apply and then the parameter of apply
 int apply_function_identifier(int count, char string[NMAX],
 							  char parameter[NMAX],
 							  struct global_image *image)
@@ -344,6 +365,7 @@ int apply_function_identifier(int count, char string[NMAX],
 	return 8;
 }
 
+// determine if operation is select and then the parameters
 int refurbished_select_identifier(int count, char string[NMAX],
 								  struct global_image *image,
 								  int *x1, int *y1, int *x2, int *y2)
@@ -397,8 +419,10 @@ int refurbished_select_identifier(int count, char string[NMAX],
 		printf("Invalid command\n");
 		return 0;
 	}
+
 	swap_function(&cpx1, &cpx2);
 	swap_function(&cpy1, &cpy2);
+
 	if (cpx1 < 0 || cpx2 < 0 || cpy1 < 0 || cpy2 < 0) {
 		printf("Invalid set of coordinates\n");
 		return 0;
@@ -409,9 +433,10 @@ int refurbished_select_identifier(int count, char string[NMAX],
 		printf("Invalid set of coordinates\n");
 		return 0;
 	}
-	*x1 = cpx1; *x2 = cpx2; *y1 = cpy1; *y2 = cpy2;
-	image->x_axis = *x2 - *x1; image->y_axis = *y2 - *y1;
-	return 2;
 
-	//return 0;
+	*x1 = cpx1; *x2 = cpx2;
+	*y1 = cpy1; *y2 = cpy2;
+	image->x_axis = *x2 - *x1;
+	image->y_axis = *y2 - *y1;
+	return 2;
 }

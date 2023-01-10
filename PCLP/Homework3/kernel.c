@@ -7,6 +7,8 @@
 #include "kernel.h"
 
 #define NMAX 50
+#define MAX_UP 255
+#define MIN_DOWN 0
 
 struct global_image {
 	char type[3];
@@ -17,6 +19,7 @@ struct global_image {
 	int **blue;
 };
 
+// creates the kernel matrix
 int **kernel_matrixes_creator(char parameter[NMAX])
 {
 	int i, j;
@@ -69,14 +72,17 @@ int **kernel_matrixes_creator(char parameter[NMAX])
 	return kernel;
 }
 
+// clamp function
 void checker_0_and_255_case(double *a)
 {
-	if (*a < 0)
-		*a = 0;
-	if (*a > 255)
-		*a = 255;
+	if (*a < MIN_DOWN)
+		*a = MIN_DOWN;
+	if (*a > MAX_UP)
+		*a = MAX_UP;
 }
 
+// apply the kernel matrix on new alloc matrixes
+// then we put the results on the current selection
 void apply_kernel(struct global_image *image, int x1, int y1, int x2, int y2,
 				  int **kernel, int div)
 {
@@ -153,6 +159,7 @@ void apply_kernel(struct global_image *image, int x1, int y1, int x2, int y2,
 	free_matrix(y2 - y1, output_g);
 }
 
+// creates a little interface to apply the correct kernel
 void kernel_interface_helper(struct global_image *image, char parameter[NMAX],
 							 int x1, int y1, int x2, int y2)
 {

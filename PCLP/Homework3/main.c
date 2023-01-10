@@ -8,6 +8,7 @@
 #include "print.h"
 #include "rotate.h"
 #include "kernel.h"
+
 #define NMAX 50
 
 struct global_image {
@@ -23,6 +24,7 @@ struct temporary {
 	int x1, x2, y1, y2;
 };
 
+// its memorising the current selection for rotate to apply correctly
 void assign(struct temporary *coord, int x1, int y1, int x2, int y2)
 {
 	coord->x1 = x1;
@@ -46,6 +48,8 @@ int main(void)
 										&angle, parameter, file, &type, &image);
 	    switch (oppp) {
 		case 1: {
+			// determine file type: if file is wrong free previous load
+			// and reset count to 0
 			file_type_determine = file_type(fptr, name_of_file);
 			if (file_type_determine == 0 && count != 0) {
 			    free_global_matrix(&image);
@@ -58,7 +62,7 @@ int main(void)
 			}
 			break;
 		}
-		case 2://idk, it works
+		case 2:
 			printf("Selected %d %d %d %d\n", x1, y1, x2, y2);
 			break;
 		case 3:

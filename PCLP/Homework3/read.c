@@ -17,6 +17,7 @@ struct global_image {
 	int **blue;
 };
 
+// the hub for reading different types of pgm/ppm files
 void file_reader_first_version(int *count, char s[NMAX], int type,
 							   FILE *fptr, struct global_image *image,
 							   int *x1, int *y1, int *x2, int *y2)
@@ -72,6 +73,7 @@ void text_file_reader_pgm_edition(char s[NMAX], FILE *fptr,
 								  struct global_image *image)
 {
 	fptr = fopen(s, "rt");
+
 	ignore_comments(fptr);
 	fscanf(fptr, "%s", image->type);
 
@@ -109,6 +111,7 @@ void text_file_reader_ppm_edition(char s[NMAX], FILE *fptr,
 								  struct global_image *image)
 {
 	fptr = fopen(s, "rt");
+
 	ignore_comments(fptr);
 	fscanf(fptr, "%s", image->type);
 
@@ -128,7 +131,20 @@ void text_file_reader_ppm_edition(char s[NMAX], FILE *fptr,
 	image->green = alloc_matrix(image->height, image->width);
 	image->blue = alloc_matrix(image->height, image->width);
 
-	if (!image->red || !image->green || !image->blue) {
+	if (!image->red) {
+		printf("Failed to alloc for %s\n", s);
+		return;
+	}
+
+	if (!image->green) {
+		free_matrix(image->height, image->red);
+		printf("Failed to alloc for %s\n", s);
+		return;
+	}
+
+	if (!image->blue) {
+		free_matrix(image->height, image->red);
+		free_matrix(image->height, image->green);
 		printf("Failed to alloc for %s\n", s);
 		return;
 	}
@@ -152,6 +168,7 @@ void binary_file_reader_pgm_edition(char s[NMAX], FILE *fptr,
 									struct global_image *image)
 {
 	fptr = fopen(s, "rb");
+
 	ignore_comments(fptr);
 	fscanf(fptr, "%s", image->type);
 
@@ -190,6 +207,7 @@ void binary_file_reader_ppm_edition(char s[NMAX], FILE *fptr,
 									struct global_image *image)
 {
 	fptr = fopen(s, "rb");
+
 	ignore_comments(fptr);
 	fscanf(fptr, "%s", image->type);
 
@@ -209,10 +227,24 @@ void binary_file_reader_ppm_edition(char s[NMAX], FILE *fptr,
 	image->green = alloc_matrix(image->height, image->width);
 	image->blue = alloc_matrix(image->height, image->width);
 
-	if (!image->red || !image->green || !image->blue) {
+	if (!image->red) {
 		printf("Failed to alloc for %s\n", s);
 		return;
 	}
+
+	if (!image->green) {
+		free_matrix(image->height, image->red);
+		printf("Failed to alloc for %s\n", s);
+		return;
+	}
+
+	if (!image->blue) {
+		free_matrix(image->height, image->red);
+		free_matrix(image->height, image->green);
+		printf("Failed to alloc for %s\n", s);
+		return;
+	}
+
 	for (int i = 0; i < image->height; i++) {
 		for (int j = 0; j < image->width; j++) {
 			unsigned char c;

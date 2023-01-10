@@ -1,3 +1,4 @@
+/// Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
 #define NMAX 50
 struct global_image;
 
