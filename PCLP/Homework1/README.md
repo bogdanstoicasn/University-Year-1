@@ -7,12 +7,12 @@
 Acesta este un README care contine detalii si explicatii despre tema 1,care este compusa din 3 probleme: infinite_product, simple_queries,gigel_and_the_checkboard, another_queries.
 
 
-##Particularitati
+## Particularitati
 Se folosesc bibliotecile: stdio.h, math.h.
 Pot aparea definiri de constante (exemplu:"NMAX"). 
 
 
-##Infinite product
+## Infinite product
 
 Problema este rezolvata cu ajutorul a 3 fisiere: "main_prod.c", "function_prod.c", "function_prod.h". Fisierul "function_prod.c" contine functiile necesare: functie care calculeaza produsul scalar("scalar_product") si functie care calculeaza norma("norm_sum"). "main_prod.c" contine programul propriu-zis, si incepe prin declararea si initializarea variabilelor cu 0 (suma scalara si normele) sau -1 (primele maxime si maximele secunde). 
 
@@ -35,7 +35,7 @@ Problema este rezolvata cu ajutorul a 3 fisiere: "main_prod.c", "function_prod.c
 
 
 
-##Simple queries
+## Simple queries
 
 Programul este compus din 3 fisiere: "main_simple.c", "function_simple.c", "function_simple.h". "function_simple.c" contine functiile: 
 	
@@ -70,7 +70,7 @@ Fisierul principal contine contor pentru toate caracterele litere mici(count_all
 	
 
 	 
-##Gigel_and_the_checkboard
+## Gigel_and_the_checkboard
 
 Problema este rezolvata cu ajutorul a 3 fisiere:"main_checkboard.c", "function_checkboard.c", "function_checkboard.h". "function_checkboard.c" contine functiile:
 	
@@ -96,7 +96,7 @@ In fisierul principal se declara numarul de linii/coloane(n), matricea(matrix) s
 	
 
 	
-##Another_queries
+## Another_queries
 
 Programul este compus din 3 fisiere: "main_another.c", "function_another.c", "function_another.h". "function_another.c" contine functiile:
 	
@@ -148,4 +148,3 @@ In fisierul principal se "main_another.c" se declara variabilele: numarul de lin
 	PAS 3: Se decrementeaza numarul de pasi si se citeste operatia.
 	
 	PAS 4: Se efectueaza operatia dorita.
-

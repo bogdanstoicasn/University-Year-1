@@ -1,13 +1,13 @@
-####Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
-#README check
+#### Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
+# README check
 
-##Descriere
+## Descriere
 
 Acesta este un README care contine detalii si explicatii despre tema 2,
 care are numele de "Simulator de octave".
 
 
-##Particularitati
+## Particularitati
 
 Fisierele sunt: main.c, function.c, function.h.
 Se folosesc bibliotecile: stdio.h, stdlib.h, math.h.
@@ -15,7 +15,7 @@ Codul este compilat cu standardul din 1999.
 Pot aparea definiri de constante(exemplu: NMAX cu valoarea 10007).
 
 
-##Simulator de octave(my_octave)
+## Simulator de octave(my_octave)
 
 Prima idee pentru tema aceasta ar fi fost folosirea unui "triplu pointer", insa 
 trebuia sa utilizez si alti vectori pentru a retine anumite variabile.
@@ -66,7 +66,3 @@ Algoritmul Strassen:
 	-se copiaza matricele de inmultit;
 	-se aplica "Strassen_algorithm_helper";
 	-matricea obtinuta se trece in a treia matrice;
-
-
-
-

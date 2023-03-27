@@ -1,14 +1,14 @@
-####Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
-####GNU GENERAL PUBLIC LICENSE 
-####Version 3, 29 June 2007
-#README check
+#### Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
+#### GNU GENERAL PUBLIC LICENSE 
+#### Version 3, 29 June 2007
+# README check
 
-##Descriere
+## Descriere
 
 Acesta este un README care contine detalii si explicatii despre tema 3,
 care are numele de "Editor de imagini".
 
-##Particularitati
+## Particularitati
 
 Fisiere *.c: kernel.c, function.c, interface.c, rotate.c, print.c, main.c
 Headere: kernel.h, function.h, interface.h, rotate.h, print.h
@@ -16,7 +16,7 @@ Codul este compilat cu standardul din 1999.
 Pot aparea definiri de constante(exemplu: NMAX cu valoarea 50).
 
 
-##Editor de imagini(image_editor)
+## Editor de imagini(image_editor)
 
 Tema abordata este construirea unui editor simplu de imagini, pentru terminal,
 fara a utiliza unealta de manipulare a imaginilor grafice, NETPBM.
@@ -73,7 +73,7 @@ Salvarea imaginii:
 	
 
 
-##Resurse/materiale citite:
+## Resurse/materiale citite:
 
 ->The C Programming Language. 2nd Edition
 	by Brian Kernighan and Dennis Ritchie
