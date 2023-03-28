@@ -39,21 +39,34 @@ typedef struct {
 arena_t* alloc_arena(const uint64_t size);
 void dealloc_arena(arena_t* arena);
 
-void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size);
-void free_block(arena_t* arena, const uint64_t address);
+void
+alloc_block(arena_t* arena, const uint64_t address, const uint64_t size);
 
-void read(arena_t* arena, uint64_t address, uint64_t size);
-void write(arena_t* arena, const uint64_t address,  const uint64_t size, int8_t *data);
-void pmap(const arena_t* arena);
-void mprotect(arena_t* arena, uint64_t address, int8_t *permission);
+void 
+free_block(arena_t* arena, const uint64_t address);
+
+void
+read(arena_t* arena, uint64_t address, uint64_t size);
+
+void 
+write(arena_t* arena, const uint64_t address,  const uint64_t size, int8_t *data);
+
+void
+pmap(const arena_t* arena);
+
+void
+mprotect(arena_t* arena, uint64_t address, int8_t *permission);
 
 
-
-
-
-
+// my functions
 void
 dll_add_nth_node(list_t* list, unsigned int n, const void* data);
 
 list_t*
 dll_create(unsigned int data_size);
+
+uint64_t
+position_identifier(list_t *list_blocks, const uint64_t address);
+
+dll_node_t*
+dll_remove_nth_node(list_t* list, unsigned int n);

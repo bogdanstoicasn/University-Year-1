@@ -60,6 +60,38 @@ dll_add_nth_node(list_t* list, unsigned int n, const void* data)
     list->size++;
 }
 
+dll_node_t*
+dll_remove_nth_node(list_t* list, unsigned int n)
+{
+	if (list->head == NULL || n >= list->size) {
+		return NULL;
+	}
+
+	list->size--;
+
+	dll_node_t *current = list->head;
+
+	if (n == 0) {
+		list->head = current->next;
+		if (list->head != NULL) {
+			list->head->prev = NULL;
+		}
+		return current;
+	}
+
+	for (unsigned int i = 0; i < n; i++) {
+		current = current->next;
+	}
+
+	current->prev->next = current->next;
+
+	if (current->next != NULL) {
+		current->next->prev = current->prev;
+	}
+
+	return current;
+}
+
 
 arena_t *alloc_arena(const uint64_t size)
 {
@@ -75,7 +107,102 @@ arena_t *alloc_arena(const uint64_t size)
 	return arena;
 }
 
-void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size) // sa incerc sa leg direct blocul de minibloc
+void dealloc_arena(arena_t* arena)
+{
+    list_t *first_head = arena->alloc_list;
+	// de facut
+}
+
+int verify_address(arena_t *arena, const uint64_t address)
+{   
+    list_t *list_blocks = arena->alloc_list;
+    dll_node_t *node = list_blocks->head;
+    while (node!= NULL) {
+        block_t *block = node->data;
+        
+        uint64_t add = block->start_address;
+        uint64_t size = block->size;
+
+        if (add + size == address)
+            return 1;
+        
+        node = node->next;
+    }
+    return 0;
+}
+
+int verify_address_final(arena_t *arena, const uint64_t address)
+{
+	list_t *temp = arena->alloc_list;
+	dll_node_t *node = temp->head;
+	while (node != NULL) {
+		block_t *block = node->data;
+
+		if (address == block->start_address)
+			return 1;
+
+		node = node->next;
+	}
+	return 0;
+}
+
+int verify_address_final(arena_t *arena, const uint64_t address)
+{
+	// de facut
+}
+
+uint64_t position_identifier(list_t *list_blocks, const uint64_t address)
+{
+    uint64_t position = 0;
+    dll_node_t *node = list_blocks->head;
+
+    while (node!= NULL) {
+        block_t *block = node->data;
+		if(address <= block->start_address) 
+			return position;
+
+		node = node->next;
+		++position;
+    }
+	return position;
+}
+
+
+dll_node_t*
+get_node(list_t *list, const uint64_t address)
+{
+	dll_node_t *node = list->head;
+	while (node != NULL) {
+		block_t *block = node->data;
+		
+		if (address == block->start_address)
+			return node;
+
+		node = node->next;
+	}
+
+	return NULL;
+}
+
+dll_node_t*
+get_node_by_poz(list_t *list, int n)
+{
+	dll_node_t *node = list->head;
+
+	int pos = 0;
+
+	while (node != NULL) {
+		if (n == pos)
+			return node;
+		
+		node = node->next;
+		++pos;
+	}
+	return NULL;
+	
+}
+
+void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size) 
 {
 	if (arena == NULL)
 		return;
@@ -110,6 +237,94 @@ void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size) //
 		dll_add_nth_node(list_blocks, 0, block);
 		dll_add_nth_node(list_miniblocks, 0, miniblock);
 
+	} else {
+        if (verify_address(arena, address) == 0) {
+			// alloc big blocky
+			uint64_t position = position_identifier(arena->alloc_list, address);
 
-	}
+			block_t *block = malloc(sizeof(block_t));
+
+			block->start_address = address;
+			block->size = size;
+			
+			list_t *list_miniblocks = malloc(sizeof(list_t));
+			block->miniblock_list = list_miniblocks;
+
+			dll_add_nth_node(arena->alloc_list, position, block);
+
+			// alloc small blocky
+			miniblock_t *miniblock = malloc(sizeof(miniblock_t));
+			
+			miniblock->start_address = address;
+			miniblock->size = size;
+			miniblock->perm = 6;
+
+			dll_add_nth_node(list_miniblocks, 0, miniblock);
+			
+			// final address
+			uint64_t second_address = address + size;
+			// we use it to check to right of this blocky
+			
+			if (verify_address_final(arena, second_address) == 1) {
+				// so we move the blocks from final address
+				// of new block
+				dll_node_t *node = get_node(arena->alloc_list, second_address);
+				dll_node_t *delete = ((list_t*)((block_t*) node->data)->miniblock_list)->head;
+
+				dll_node_t *current = ((list_t*)block->miniblock_list)->head;
+
+				current->next = delete;
+				delete->prev = current;
+
+				((list_t*)block->miniblock_list)->size +=
+					 ((list_t*)((block_t*) node->data)->miniblock_list)->size;
+
+				((list_t*)((block_t*) node->data)->miniblock_list)->head = NULL;
+
+				dll_node_t *new = get_node_by_poz(arena->alloc_list, position);
+				
+				// add to current size
+				((block_t*)new->data)->size += ((block_t*)node->data)->size;
+
+				dll_node_t *remove = dll_remove_nth_node(arena->alloc_list, 1 + position);
+				// sa dau free sau nu????????????????????????????????????????????????????????????????????
+			}
+        } else {
+			uint64_t position = position_identifier(arena, address) - 1;
+			dll_node_t *node = get_node_by_poz(arena->alloc_list, position);
+
+			block_t *block = node->data;
+			list_t *list_miniblocks = block->miniblock_list;
+
+			miniblock_t *miniblock = malloc(sizeof(miniblock_t));
+			miniblock->start_address = address;
+			miniblock->size = size;
+			miniblock->perm = 6;
+
+			dll_add_nth_node(list_miniblocks, list_miniblocks->size, miniblock);
+			block->size += size;
+
+			uint64_t address2 = address + size;
+
+			if (verify_address_final(arena, address2) == 1) {
+				dll_node_t *second_node = get_node(arena->alloc_list, address2);
+				dll_node_t *delete = ((list_t*)((block_t*)second_node->data)->miniblock_list)->head;
+
+				dll_node_t *current = list_miniblocks->head;
+				while (current->next != NULL)
+					current = current->next;
+
+				current->next = delete;
+				delete->prev = current;
+				list_miniblocks += ((list_t*)((block_t*)second_node->data)->miniblock_list)->size;
+
+				((list_t*)((block_t*)second_node->data)->miniblock_list)->head = NULL;
+
+				((block_t*)node->data)->size += ((block_t*)second_node->data)->size;
+
+				dll_node_t *remove = dll_remove_nth_node(arena->alloc_list, 1 + position);
+				// sa dau free?????????????????????????????????????????????????????????
+			}
+		}
+    }
 }

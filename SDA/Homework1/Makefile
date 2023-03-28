@@ -4,7 +4,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -std=c99
 
-SOURCES = vma.c  main.c
+SOURCES = vma.c interface.c main.c
 OBJECTS = $(SOURCES:.c=.o)
 
 EXECUTABLE = vma
