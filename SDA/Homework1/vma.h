@@ -11,12 +11,11 @@ typedef struct dll_node_t
 
 typedef struct {
     uint64_t start_address;
-	uint64_t end_address;
-	
 	dll_node_t* head;
 	unsigned int data_size;
 	unsigned int size;
 }list_t;
+
 
 typedef struct {
     uint64_t start_address;
@@ -59,14 +58,27 @@ mprotect(arena_t* arena, uint64_t address, int8_t *permission);
 
 
 // my functions
-void
-dll_add_nth_node(list_t* list, unsigned int n, const void* data);
 
-list_t*
-dll_create(unsigned int data_size);
 
 uint64_t
 position_identifier(list_t *list_blocks, const uint64_t address);
 
+// dll_node functions
+
+list_t*
+dll_create(unsigned int data_size);
+
+void
+dll_add_nth_node(list_t* list, unsigned int n, const void* data);
+
 dll_node_t*
 dll_remove_nth_node(list_t* list, unsigned int n);
+
+void
+dll_free(list_t** pp_list);
+
+dll_node_t*
+get_node(list_t *list, const uint64_t address);
+
+dll_node_t*
+get_node_by_poz(list_t *list, int n);
