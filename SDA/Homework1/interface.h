@@ -13,3 +13,5 @@ int dealloc_arena_interface(char copy_string[NMAX]);
 int alloc_block_interface(char copy_string[NMAX], int *address, int *size);
 
 int free_block_interface(char copy_string[NMAX], int *address);
+
+int read_interface(char copy_string[NMAX], int *address, int *size);

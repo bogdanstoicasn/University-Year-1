@@ -37,6 +37,9 @@ int interface_handler(int *address, int *size, char *pointer)
 
     if (strcmp(p, "FREE_BLOCK") == 0)
         return free_block_interface(copy_string, address);
+
+    if (strcmp(p, "READ") == 0)
+        return read_interface(copy_string, address, size);
     return 0;
 }
 
@@ -110,8 +113,6 @@ int alloc_block_interface(char copy_string[NMAX], int *address, int *size)
 	if (contor != 2)
         return 0;
 
-    if (ch2 == 0)
-        return 0;
     
     
     *address = ch1;
@@ -138,4 +139,34 @@ int free_block_interface(char copy_string[NMAX], int *address)
         return 0;
 
     return 4;
+}
+
+int read_interface(char copy_string[NMAX], int *address, int *size)
+{
+    char *p = strtok(copy_string, " ");
+	int contor = 0, ch1 = -1, ch2 = -1, ok = 0;
+	while (p) {
+		if (p[0] >= 'A' && p[0] <= 'Z') {
+			ok++;
+		} else {
+			if (contor == 0)
+				ch1 = atoi(p);
+
+			if (contor == 1)
+				ch2 = atoi(p);
+
+			contor++;
+		}
+	p = strtok(NULL, " ");
+	}
+
+	if (contor != 2)
+        return 0;
+
+    
+    
+    *address = ch1;
+	*size = ch2;
+
+	return 5;
 }

@@ -36,6 +36,7 @@ int main()
 			case 5:
 				// TO DO
 				// read + error
+				printf("%d cu marime de %d\n",address, size);
 				break;
 			case 6:
 				// TO DO 

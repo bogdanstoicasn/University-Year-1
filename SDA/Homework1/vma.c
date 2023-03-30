@@ -145,7 +145,8 @@ void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 	uint64_t address2 = address + size;
 	int overlap_begin = verify_address_beginning(arena, address2);
 	int overlap_final = verify_address_final(arena, address);
-	if (overlap_begin == 1 && overlap_final == 1) {
+	// IES 0 CAND ADRESA 2 este == adresa 1
+	if ((overlap_begin == 1 && overlap_final == 1) || (overlap_begin == 0 && overlap_final == 0 && address2 == address)) {
 		uint64_t position1 = position_identifier(list_blocks, address);
 		uint64_t position2 = position_identifier(list_blocks, address2);
 		
@@ -196,6 +197,7 @@ void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 
 	if (overlap_final == 1) {
 		uint64_t position = position_identifier(list_blocks, address);
+		if (position <= 0) position = 1;
 		dll_node_t *node = get_node_by_poz(list_blocks, position - 1);
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
@@ -218,8 +220,18 @@ void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 
 void pmap(const arena_t *arena)
 {
-	printf("Total memory: %ld bytes\n", arena->arena_size);
-	printf("Free memory: y bytes\n");
+	printf("Total memory: 0x%lx bytes\n", arena->arena_size);
+
+	dll_node_t *node_free = arena->alloc_list->head;
+  	int dim = 0;
+  	while (node_free != NULL) {
+		block_t *block = node_free->data;
+    	dim += block->size;
+    	node_free = node_free->next;
+  	}
+	dim = arena->arena_size - dim;
+	printf("Free memory: 0x%x bytes\n", dim);
+
 	printf("Number of allocated blocks: %d\n", arena->alloc_list->size);
 
 	dll_node_t *current = arena->alloc_list->head;
@@ -230,7 +242,6 @@ void pmap(const arena_t *arena)
 		nr_mini += list_mini->size;
 		current = current->next;
 	}
-
 	printf("Number of allocated miniblocks: %d\n",nr_mini);
 
 	int n = arena->alloc_list->size;
@@ -238,18 +249,20 @@ void pmap(const arena_t *arena)
 	for (int i = 1; i <= n; ++i) {
 		printf("Block %d begin\n", i);
 		block_t *block = current->data;
-		printf("Zone: %ld - %ld\n", block->start_address, block->start_address + block->size);
+		printf("Zone: 0x%lx - 0x%lx\n", block->start_address, block->start_address + block->size);
 		
 		list_t *mini_list = block->miniblock_list;
 		dll_node_t *node = mini_list->head;
 		for (uint64_t j = 1; j <= mini_list->size; ++j) {
 			miniblock_t *mini = node->data;
 			printf("Miniblock %ld:", j);
-			printf("\t\t%ld\t\t-\t\t%ld\t\t|",mini->start_address, mini->start_address + mini->size);
+			printf("\t\t0x%lx\t\t-\t\t0x%lx\t\t|",mini->start_address, mini->start_address + mini->size);
 			printf(" RW-\n");
 			node = node->next;
 		}
+
 		current = current->next;
+
 		printf("Block %d end\n", i);
 	}
 }
