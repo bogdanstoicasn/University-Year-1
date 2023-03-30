@@ -1,41 +1,52 @@
 #include "vma.h"
+#include "interface.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #define STRING_MAX 128
+
 int main()
 {
-	char comm[STRING_MAX];
-  arena_t *arena = NULL;
-  while (1) {
-    scanf("%s", comm);
-
-    if (strcmp(comm, "ALLOC_ARENA") == 0) {
-      int size;
-      scanf("%d", &size);
-      arena = alloc_arena(size);
-    }
-
-    if (strcmp(comm, "ALLOC_BLOCK") == 0) {
-      int adr_start, dim;
-      scanf("%d %d", &adr_start, &dim);
-
-      alloc_block(arena, adr_start, dim);
-    }
-
-    if (strcmp(comm, "PRINT") == 0) {
-      int n =
-          ((list_t *)((block_t *)arena->alloc_list->head->data)->miniblock_list)
-              ->size;
-      int m = ((block_t *)arena->alloc_list->head->data)->size;
-      printf("%d %d %d\n", arena->alloc_list->size, n, m);
-    }
-	  if (strcmp(comm,"FREE") == 0) {
-		  dealloc_arena(arena);
-		  break;
-	  }
-    if (strcmp(comm,"PMAP") == 0)
-      pmap(arena);
-  }
+  	arena_t *arena = NULL;
+  	int ok = -1, address = -1, size = -1;
+  	char *pointer = NULL;
+  	while (1) {
+    	ok = interface_handler(&address, &size, pointer);
+    	switch (ok) {
+			case 0:
+				printf("Invalid command. Please try again.\n");
+				break;
+			case 1:
+				arena = alloc_arena(size);
+				break;
+			case 2:
+				dealloc_arena(arena);
+				break;
+			case 3:
+				// TO DO
+				// error function
+				alloc_block(arena, address, size);
+				break;
+			case 4:
+				// TO DO
+				// free block + error
+				printf("%d == address to free\n",address);
+				break;
+			case 5:
+				// TO DO
+				// read + error
+				break;
+			case 6:
+				// TO DO 
+				// write + error
+				break;
+			case 7:
+				pmap(arena);
+				break;
+    	}
+		if (ok == 2)
+			break;
+  	}
 	return 0;
 }
