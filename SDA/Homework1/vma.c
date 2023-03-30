@@ -145,15 +145,43 @@ void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 	uint64_t address2 = address + size;
 	int overlap_begin = verify_address_beginning(arena, address2);
 	int overlap_final = verify_address_final(arena, address);
-	
 	if (overlap_begin == 1 && overlap_final == 1) {
-		/// de facut
+		uint64_t position1 = position_identifier(list_blocks, address);
+		uint64_t position2 = position_identifier(list_blocks, address2);
+		
+		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1);
+		dll_node_t *next_node = get_node_by_poz(list_blocks, position2);
+
+		// we set the miniblock to beginning of next block
+		block_t *next_block = next_node->data;
+		list_t *next_mini_list = next_block->miniblock_list;
+		dll_add_nth_node(next_mini_list, 0, miniblock);
+		next_block->size += size;
+		next_block->start_address = address;
+
+		// we then combine the previous miniblock list with the next one
+		block_t *present = node->data;
+		list_t *mini_list = present->miniblock_list;
+		dll_node_t *last = get_node_by_poz(mini_list, mini_list->size - 1);
+		last->next = next_mini_list->head;
+		next_mini_list->head->prev = last;
+
+		mini_list->size +=next_mini_list->size;
+		present->size += next_block->size;
+
+		free(next_mini_list);
+		free(next_block);
+		free(list_miniblocks);
+		free(miniblock);
+		free(block);
+		dll_remove_nth_node(list_blocks, position2);
+		free(next_node);
 		return;
 	}
 
 	if(overlap_begin == 1) {
 		uint64_t position = position_identifier(list_blocks, address2);
-		dll_node_t *node = get_node_by_poz(list_blocks, position); // node de pe pozitia IN CARE SE PETRECE CE AVEM NOI NEVOIE
+		dll_node_t *node = get_node_by_poz(list_blocks, position); 
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
 		dll_add_nth_node(mini_list, 0, miniblock);
