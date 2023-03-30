@@ -242,7 +242,7 @@ void pmap(const arena_t *arena)
 		nr_mini += list_mini->size;
 		current = current->next;
 	}
-	printf("Number of allocated miniblocks: %d\n",nr_mini);
+	printf("Number of allocated miniblocks: %d\n\n", nr_mini);
 
 	int n = arena->alloc_list->size;
 	current = arena->alloc_list->head;
