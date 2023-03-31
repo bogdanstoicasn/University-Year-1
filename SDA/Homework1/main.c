@@ -29,7 +29,8 @@ int main()
 					alloc_block(arena, address, size);
 				break;
 			case 4:
-				// TO DO
+				errors = address_free_perror(arena, address);
+				if (errors == 1) ;
 				// free block + error
 				break;
 			case 5:

@@ -3,7 +3,8 @@
 #include <string.h>
 #include "vma.h"
 
-arena_t *alloc_arena(const uint64_t size)
+arena_t 
+*alloc_arena(const uint64_t size)
 {
 	arena_t *arena = malloc(sizeof(arena_t));
 	arena->arena_size = size;
@@ -16,7 +17,8 @@ arena_t *alloc_arena(const uint64_t size)
 	return arena;
 }
 
-void dealloc_arena(arena_t* arena)
+void 
+dealloc_arena(arena_t* arena)
 {
     list_t *first_head = arena->alloc_list;
 	
@@ -33,7 +35,8 @@ void dealloc_arena(arena_t* arena)
 	free(arena);
 }// TERMINAT
 
-int verify_address_final(arena_t *arena, const uint64_t address) // final address of node with our address
+int 
+verify_address_final(arena_t *arena, const uint64_t address) // final address of node with our address
 {   
     list_t *list_blocks = arena->alloc_list;
     dll_node_t *node = list_blocks->head;
@@ -51,7 +54,8 @@ int verify_address_final(arena_t *arena, const uint64_t address) // final addres
     return 0;
 }
 
-int verify_address_beginning(arena_t *arena, const uint64_t address) // start adress of node with our address
+int 
+verify_address_beginning(arena_t *arena, const uint64_t address) // start adress of node with our address
 {
 	list_t *temp = arena->alloc_list;
 	dll_node_t *node = temp->head;
@@ -67,7 +71,8 @@ int verify_address_beginning(arena_t *arena, const uint64_t address) // start ad
 }
 
 
-uint64_t position_identifier(list_t *list_blocks, const uint64_t address)
+uint64_t 
+position_identifier(list_t *list_blocks, const uint64_t address)
 {
     uint64_t position = 0;
     dll_node_t *node = list_blocks->head;
@@ -110,7 +115,8 @@ get_node_by_poz(list_t *list, int n)
 	return NULL;
 	
 }
-void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size) 
+void 
+alloc_block(arena_t* arena, const uint64_t address, const uint64_t size) 
 {
 	if (arena == NULL)
 		return;
@@ -218,7 +224,8 @@ void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 	free(miniblock);
 }
 
-void pmap(const arena_t *arena)
+void 
+pmap(const arena_t *arena)
 {
 	printf("Total memory: 0x%lX bytes\n", arena->arena_size);
 
@@ -311,4 +318,42 @@ alloc_block_perrror(arena_t *arena, const uint64_t address, const uint64_t size)
 		current = current->next;
 	}
 	return 1;
+}
+
+int 
+address_free_perror(arena_t *arena, const uint64_t address)
+{
+	if (address >= arena->arena_size) {
+		printf("Invalid address for free.\n");
+		return 0;
+	}
+
+	int ok = 0;
+
+	dll_node_t *current = arena->alloc_list->head;
+	while (current != NULL) {
+		block_t *block = current->data;
+		list_t *list_mini = block->miniblock_list;
+		dll_node_t *node_mini = list_mini->head;
+
+		while (node_mini != NULL) {
+			miniblock_t *miniblock = node_mini->data;
+			if (miniblock->start_address == address) {
+				ok++;
+				return 1;
+			}
+			node_mini = node_mini->next;
+		}
+		current = current->next;
+	}
+
+	printf("Invalid address for free.\n");
+	return 0;
+}
+
+int 
+address_read_perror(arena_t *arena, const uint64_t address)
+{
+	(void) address;
+	(void) arena;
 }

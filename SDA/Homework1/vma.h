@@ -66,6 +66,9 @@ position_identifier(list_t *list_blocks, const uint64_t address);
 int 
 alloc_block_perrror(arena_t *arena, const uint64_t address, const uint64_t size);
 
+int 
+address_free_perror(arena_t *arena, const uint64_t address);
+
 // dll_node functions
 
 list_t*

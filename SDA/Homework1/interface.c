@@ -89,8 +89,10 @@ int pmap_interface(char copy_string[NMAX])
         ++ok;
         p = strtok(NULL, " ");
     }
-    if (ok != 1) 
-        return 0;
+    if (ok != 1) {
+        print_error(ok);
+        return  0;
+    }
 
     return 7;
 }
@@ -159,7 +161,7 @@ int free_block_interface(char copy_string[NMAX], int *address)
         return 0;
     }
 
-    if (*address <= 0)
+    if (*address < 0)
         return 0;
 
     return 4;
