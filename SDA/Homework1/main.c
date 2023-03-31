@@ -9,7 +9,7 @@
 int main()
 {
   	arena_t *arena = NULL;
-  	int ok = -1, address = -1, size = -1;
+  	int ok = -1, address = -1, size = -1, errors = -1;
   	char *pointer = NULL;
   	while (1) {
     	ok = interface_handler(&address, &size, pointer);
@@ -24,19 +24,17 @@ int main()
 				dealloc_arena(arena);
 				break;
 			case 3:
-				// TO DO
-				// error function
-				alloc_block(arena, address, size);
+				errors = alloc_block_perrror(arena, address, size);
+				if (errors == 1) 
+					alloc_block(arena, address, size);
 				break;
 			case 4:
 				// TO DO
 				// free block + error
-				printf("%d == address to free\n",address);
 				break;
 			case 5:
 				// TO DO
 				// read + error
-				printf("%d cu marime de %d\n",address, size);
 				break;
 			case 6:
 				// TO DO 

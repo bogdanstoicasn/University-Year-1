@@ -220,7 +220,7 @@ void alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 
 void pmap(const arena_t *arena)
 {
-	printf("Total memory: 0x%lx bytes\n", arena->arena_size);
+	printf("Total memory: 0x%lX bytes\n", arena->arena_size);
 
 	dll_node_t *node_free = arena->alloc_list->head;
   	int dim = 0;
@@ -230,7 +230,7 @@ void pmap(const arena_t *arena)
     	node_free = node_free->next;
   	}
 	dim = arena->arena_size - dim;
-	printf("Free memory: 0x%x bytes\n", dim);
+	printf("Free memory: 0x%X bytes\n", dim);
 
 	printf("Number of allocated blocks: %d\n", arena->alloc_list->size);
 
@@ -249,14 +249,14 @@ void pmap(const arena_t *arena)
 	for (int i = 1; i <= n; ++i) {
 		printf("Block %d begin\n", i);
 		block_t *block = current->data;
-		printf("Zone: 0x%lx - 0x%lx\n", block->start_address, block->start_address + block->size);
+		printf("Zone: 0x%lX - 0x%lX\n", block->start_address, block->start_address + block->size);
 		
 		list_t *mini_list = block->miniblock_list;
 		dll_node_t *node = mini_list->head;
 		for (uint64_t j = 1; j <= mini_list->size; ++j) {
 			miniblock_t *mini = node->data;
 			printf("Miniblock %ld:", j);
-			printf("\t\t0x%lx\t\t-\t\t0x%lx\t\t|",mini->start_address, mini->start_address + mini->size);
+			printf("\t\t0x%lX\t\t-\t\t0x%lX\t\t|",mini->start_address, mini->start_address + mini->size);
 			printf(" RW-\n");
 			node = node->next;
 		}
@@ -265,4 +265,50 @@ void pmap(const arena_t *arena)
 
 		printf("Block %d end\n", i);
 	}
+}
+
+int 
+alloc_block_perrror(arena_t *arena, const uint64_t address, const uint64_t size)
+{
+	if (address >= arena->arena_size) {
+		printf("The allocated address is outside the size of arena\n");
+		return 0;
+	}
+	if (size > arena->arena_size) {
+		printf("The allocated address is outside the size of arena\n");
+		return 0;
+	}
+	if (size + address > arena->arena_size) {
+		printf("The end address is past the size of the arena\n");
+		return 0;
+	}
+
+	dll_node_t *current = arena->alloc_list->head;
+	while (current != NULL) {
+		block_t *block = current->data;
+		uint64_t sum = size + address;
+		uint64_t lower_limit = block->start_address;
+		uint64_t upper_limit = block->size + lower_limit;
+
+		if (address > lower_limit && address < upper_limit) {
+			printf("This zone was already allocated.\n");
+			return 0;
+		}
+
+		if (sum > lower_limit && sum < upper_limit) {
+			printf("This zone was already allocated.\n");
+			return 0;
+		}
+
+		if (block->start_address < sum && block->start_address > address) {
+			printf("This zone was already allocated.\n");
+			return 0;
+		}
+		if (address == block->start_address && sum == upper_limit) {
+			printf("This zone was already allocated.\n");
+			return 0;
+		}
+		current = current->next;
+	}
+	return 1;
 }

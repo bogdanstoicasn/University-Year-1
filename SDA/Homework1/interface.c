@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define NMAX 64
-
+int error_cmd(char copy_string[NMAX]);
 int interface_handler(int *address, int *size, char *pointer)
 {
     char string[NMAX], copy_string[NMAX];
@@ -40,9 +40,25 @@ int interface_handler(int *address, int *size, char *pointer)
 
     if (strcmp(p, "READ") == 0)
         return read_interface(copy_string, address, size);
+    
+    return error_cmd(copy_string);
+}
+void print_error(int ok)
+{
+    for (int i = 0; i < ok - 1; ++i)
+        printf("Invalid command. Please try again.\n");
+}
+int error_cmd(char copy_string[NMAX])
+{
+    char *p = strtok(copy_string, " ");
+	int ok = 0;
+	while (p) {
+		++ok;
+		p = strtok(NULL, " ");
+	}
+    print_error(ok);
     return 0;
 }
-
 int arena_interface(char copy_string[NMAX], int *size)
 {
     char *p = strtok(copy_string, " ");
@@ -54,8 +70,10 @@ int arena_interface(char copy_string[NMAX], int *size)
 		p = strtok(NULL, " ");
 	}
 
-    if (ok <= 1 || ok >= 3)
+    if (ok <= 1 || ok >= 3) {
+        print_error(ok);
         return 0;
+    }
 
     if (*size <= 0)
         return 0;
@@ -85,8 +103,10 @@ int dealloc_arena_interface(char copy_string[NMAX])
         ++ok;
         p = strtok(NULL, " ");
     }
-    if (ok != 1) 
+    if (ok != 1) {
+        print_error(ok);
         return 0;
+    }
 
     return 2;
 }
@@ -110,8 +130,10 @@ int alloc_block_interface(char copy_string[NMAX], int *address, int *size)
 	p = strtok(NULL, " ");
 	}
 
-	if (contor != 2)
+	if (contor != 2) {
+        print_error(ok);
         return 0;
+    }
 
     
     
@@ -132,8 +154,10 @@ int free_block_interface(char copy_string[NMAX], int *address)
 		p = strtok(NULL, " ");
 	}
 
-    if (ok <= 1 || ok >=3)
+    if (ok <= 1 || ok >= 3) {
+        print_error(ok);
         return 0;
+    }
 
     if (*address <= 0)
         return 0;
@@ -160,8 +184,10 @@ int read_interface(char copy_string[NMAX], int *address, int *size)
 	p = strtok(NULL, " ");
 	}
 
-	if (contor != 2)
+	if (contor != 2) {
+        print_error(ok);
         return 0;
+    }
 
     
     
