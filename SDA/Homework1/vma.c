@@ -319,24 +319,24 @@ pmap(const arena_t *arena)
 	dim = arena->arena_size - dim;
 	printf("Free memory: 0x%lX bytes\n", dim);
 
-	printf("Number of allocated blocks: %d\n", arena->alloc_list->size);
+	printf("Number of allocated blocks: %u\n", arena->alloc_list->size);
 
 	dll_node_t *current = arena->alloc_list->head;
-	int nr_mini = 0;
+	uint64_t nr_mini = 0;
 	while (current != NULL) {
 		block_t *block = current->data;
 		list_t *list_mini = block->miniblock_list;
 		nr_mini += list_mini->size;
 		current = current->next;
 	}
-	printf("Number of allocated miniblocks: %d\n", nr_mini);
+	printf("Number of allocated miniblocks: %ld\n", nr_mini);
 	if (nr_mini != 0) 
 		printf("\n");
 
-	int n = arena->alloc_list->size;
+	uint64_t n = arena->alloc_list->size;
 	current = arena->alloc_list->head;
-	for (int i = 1; i <= n; ++i) {
-		printf("Block %d begin\n", i);
+	for (uint64_t i = 1; i <= n; ++i) {
+		printf("Block %ld begin\n", i);
 		block_t *block = current->data;
 		printf("Zone: 0x%lX - 0x%lX\n", block->start_address, block->start_address + block->size);
 		
@@ -352,7 +352,7 @@ pmap(const arena_t *arena)
 
 		current = current->next;
 
-		printf("Block %d end\n", i);
+		printf("Block %ld end\n", i);
 		if (i < n) 
 			printf("\n");
 	}
