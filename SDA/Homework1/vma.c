@@ -282,7 +282,8 @@ free_block(arena_t* arena, const uint64_t address)
 		return;
 	}
 
-	if (position == 1) {
+	if (position == 1) { // we have to end it
+		return;
 		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1);
 		block_t *block = node->data;
 		list_t *list_mini = block->miniblock_list;
@@ -295,8 +296,28 @@ free_block(arena_t* arena, const uint64_t address)
 		}
 		list_mini->size--;
 		block->size = ((miniblock_t*)curr->data)->start_address - block->start_address;
+		
 		dll_node_t *previous = curr->prev;
 		dll_node_t *next = curr->next;
+		previous->next = NULL;
+		// works till here
+		// MALLOC NEW BLOCK 
+		block_t *new_block = malloc(sizeof(block_t));
+		list_t *new_mini_list = dll_create(sizeof(miniblock_t));
+		block->miniblock_list = new_mini_list;
+		new_mini_list->head = next;
+
+		new_block->start_address = ((miniblock_t*)(next->data))->start_address;
+		new_block->size = 0;
+		dll_node_t *travel = next;
+		while (travel != NULL) {
+			miniblock_t *new_mini = travel->data;
+			new_block->size += new_mini->size;
+			travel = travel->next;
+		}
+
+		dll_add_nth_node(list_blocks, position1, new_block);
+		free(new_block);
 
 		return;
 	}
