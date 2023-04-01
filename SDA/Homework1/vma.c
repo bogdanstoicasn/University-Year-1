@@ -202,7 +202,7 @@ alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 		dll_node_t *node = get_node_by_poz(list_blocks, position - 1);
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
-		dll_add_nth_node(mini_list, position + 1, miniblock);
+		dll_add_nth_node(mini_list, mini_list->size, miniblock);
 		present->size += size;
 		free(list_miniblocks);
 		free(block);
@@ -216,6 +216,7 @@ alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 	free(block);
 	free(miniblock);
 }
+
 
 int
 free_block_verifier(arena_t* arena, const uint64_t address)
@@ -235,41 +236,23 @@ free_block_verifier(arena_t* arena, const uint64_t address)
 	while (node != NULL) {
 		block_t *block = node->data;
 		list_t *lis_mini = block->miniblock_list;
-		uint64_t ok = position_offset_miniblock(lis_mini, address);
-		if (ok == 1) 
-			return 1;
-		else 
+		dll_node_t *curr = lis_mini->head;
+		uint64_t sum = 0;
+		while (curr != NULL) {
+			miniblock_t *mini = curr->data;
+			if (address == mini->start_address) {
+				sum = mini->size + mini->start_address;
+			}
+			curr = curr->next;
+		}
+		if (sum == block->size + block->start_address)
 			return 2;
-		
 		node = node->next;
 	}
 
-	return INT32_MAX;
-}
-
-int
-position_offset_miniblock(list_t *list, const uint64_t address)
-{
-	dll_node_t *curr = list->head;
-	uint64_t count = 0;
-	uint64_t poz = 0, dimension = list->size;
-	while (curr != NULL) {
-		count++;
-		miniblock_t *block_mini = curr->data;
-		
-		if (address == block_mini->start_address) {
-			poz = count;
-			//break;
-		}
-
-		curr = curr->next;
-	}
-
-	if (poz == dimension)
-		return 2;
-	
 	return 1;
 }
+
 
 void
 free_block(arena_t* arena, const uint64_t address)
@@ -277,8 +260,8 @@ free_block(arena_t* arena, const uint64_t address)
 	int position = free_block_verifier(arena, address);
 	list_t *list_blocks = arena->alloc_list;
 	uint64_t position1 = position_identifier(list_blocks, address);
-	dll_node_t *node = get_node_by_poz(list_blocks, position1);
 	if (position == 0) {
+		dll_node_t *node = get_node_by_poz(list_blocks, position1);
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
 		dll_node_t *delete = dll_remove_nth_node(mini_list, 0);
@@ -300,11 +283,31 @@ free_block(arena_t* arena, const uint64_t address)
 	}
 
 	if (position == 1) {
-		//printf("mijloc\n");
+		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1);
+		block_t *block = node->data;
+		list_t *list_mini = block->miniblock_list;
+		dll_node_t *curr = list_mini->head;
+		while (curr != NULL) {
+			miniblock_t *miniblock = curr->data;
+			if (miniblock->start_address == address)
+				break;
+			curr = curr->next;
+		}
+		list_mini->size--;
+		block->size = ((miniblock_t*)curr->data)->start_address - block->start_address;
+		dll_node_t *previous = curr->prev;
+		dll_node_t *next = curr->next;
+
 		return;
 	}
 	if (position == 2) {
-		//rintf("fina\n");
+		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1); //de vzt
+		block_t *block = node->data;
+		list_t *list_mini = block->miniblock_list;
+		dll_node_t *delete = dll_remove_nth_node(list_mini, list_mini->size - 1);
+		block->size -= ((miniblock_t*)delete->data)->size;
+		free(delete->data);
+		free(delete);
 		return;
 	}
 	return;

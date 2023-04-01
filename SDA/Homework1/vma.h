@@ -77,8 +77,6 @@ address_read_perror(arena_t *arena, const uint64_t address);
 int
 address_write_perror(arena_t *arena, const uint64_t address);
 
-int
-position_offset_miniblock(list_t *list, const uint64_t address);
 
 // dll_node functions
 
