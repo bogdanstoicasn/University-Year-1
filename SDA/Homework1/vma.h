@@ -63,11 +63,23 @@ mprotect(arena_t* arena, uint64_t address, int8_t *permission);
 uint64_t
 position_identifier(list_t *list_blocks, const uint64_t address);
 
+int
+free_block_verifier(arena_t* arena, const uint64_t address);
+
 int 
 alloc_block_perrror(arena_t *arena, const uint64_t address, const uint64_t size);
 
 int 
 address_free_perror(arena_t *arena, const uint64_t address);
+
+int 
+address_read_perror(arena_t *arena, const uint64_t address);
+
+int
+address_write_perror(arena_t *arena, const uint64_t address);
+
+int
+position_offset_miniblock(list_t *list, const uint64_t address);
 
 // dll_node functions
 
@@ -85,6 +97,7 @@ dll_free(list_t** pp_list);
 
 dll_node_t*
 get_node(list_t *list, const uint64_t address);
+
 
 dll_node_t*
 get_node_by_poz(list_t *list, int n);

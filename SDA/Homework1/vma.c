@@ -115,6 +115,7 @@ get_node_by_poz(list_t *list, int n)
 	return NULL;
 	
 }
+
 void 
 alloc_block(arena_t* arena, const uint64_t address, const uint64_t size) 
 {
@@ -152,7 +153,7 @@ alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 	int overlap_begin = verify_address_beginning(arena, address2);
 	int overlap_final = verify_address_final(arena, address);
 	// IES 0 CAND ADRESA 2 este == adresa 1
-	if ((overlap_begin == 1 && overlap_final == 1) || (overlap_begin == 0 && overlap_final == 0 && address2 == address)) {
+	if (overlap_begin == 1 && overlap_final == 1) {
 		uint64_t position1 = position_identifier(list_blocks, address);
 		uint64_t position2 = position_identifier(list_blocks, address2);
 		
@@ -214,14 +215,86 @@ alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 		free(miniblock);
 		return;
 	}
-
 	uint64_t position = position_identifier(list_blocks, address);
-	
 	dll_add_nth_node(list_blocks, position, block);
 	dll_add_nth_node(list_miniblocks, 0, miniblock);
 
 	free(block);
 	free(miniblock);
+}
+
+int
+free_block_verifier(arena_t* arena, const uint64_t address)
+{
+	dll_node_t *node = arena->alloc_list->head;
+
+	while (node != NULL) {
+		block_t *block = node->data;
+		
+		if (block->start_address == address)
+			return 0;
+
+		node = node->next;
+	}
+
+	node = arena->alloc_list->head;
+	while (node != NULL) {
+		block_t *block = node->data;
+		list_t *lis_mini = block->miniblock_list;
+		uint64_t ok = position_offset_miniblock(lis_mini, address);
+		if (ok == 1) 
+			return 1;
+		else 
+			return 2;
+		
+		node = node->next;
+	}
+
+	return INT32_MAX;
+}
+
+int
+position_offset_miniblock(list_t *list, const uint64_t address)
+{
+	dll_node_t *curr = list->head;
+	uint64_t count = 0;
+	uint64_t poz = 0, size_dummies, dimension = list->size;
+	while (curr != NULL) {
+		count++;
+		miniblock_t *block_mini = curr->data;
+		
+		if (address == block_mini->start_address) {
+			poz = count;
+			break;
+		}
+
+		curr = curr->next;
+	}
+
+	if (poz == dimension)
+		return 2;
+	
+	return 1;
+}
+
+void
+free_block(arena_t* arena, const uint64_t address)
+{
+	int position = free_block_verifier(arena, address);
+	if (position == 0) {
+		//printf("inceput\n");
+		return;
+	}
+
+	if (position == 1) {
+		//printf("mijloc\n");
+		return;
+	}
+	if (position == 2) {
+		//printf("fina\n");
+		return;
+	}
+	return;
 }
 
 void 
@@ -328,7 +401,6 @@ address_free_perror(arena_t *arena, const uint64_t address)
 		return 0;
 	}
 
-	int ok = 0;
 
 	dll_node_t *current = arena->alloc_list->head;
 	while (current != NULL) {
@@ -339,7 +411,6 @@ address_free_perror(arena_t *arena, const uint64_t address)
 		while (node_mini != NULL) {
 			miniblock_t *miniblock = node_mini->data;
 			if (miniblock->start_address == address) {
-				ok++;
 				return 1;
 			}
 			node_mini = node_mini->next;
@@ -354,6 +425,51 @@ address_free_perror(arena_t *arena, const uint64_t address)
 int 
 address_read_perror(arena_t *arena, const uint64_t address)
 {
-	(void) address;
-	(void) arena;
+	if (arena->arena_size <= address) {
+		printf("Invalid address for read.\n");
+		return 0;
+	}
+
+
+	dll_node_t *current = arena->alloc_list->head;
+	while (current != NULL) {
+		block_t *block = current->data;
+		uint64_t lower_limit = block->start_address;
+		uint64_t upper_limit = block->start_address + block->size;
+
+		if (address >= lower_limit && address <= upper_limit) {
+			return 1;
+		}
+
+		current = current->next;
+	}
+
+	printf("Invalid address for read.\n");
+	return 0;
+}
+
+int
+address_write_perror(arena_t *arena, const uint64_t address)
+{
+	if (arena->arena_size <= address) {
+		printf("Invalid address for write.\n");
+		return 0;
+	}
+
+
+	dll_node_t *current = arena->alloc_list->head;
+	while (current != NULL) {
+		block_t *block = current->data;
+		uint64_t lower_limit = block->start_address;
+		uint64_t upper_limit = block->start_address + block->size;
+
+		if (address >= lower_limit && address <= upper_limit) {
+			return 1;
+		}
+
+		current = current->next;
+	}
+
+	printf("Invalid address for write.\n");
+	return 0;
 }

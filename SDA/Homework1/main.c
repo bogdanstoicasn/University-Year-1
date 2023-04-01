@@ -30,16 +30,17 @@ int main()
 				break;
 			case 4:
 				errors = address_free_perror(arena, address);
-				if (errors == 1) ;
+				if (errors == 1)
+					free_block(arena, address);
 				// free block + error
 				break;
 			case 5:
-				// TO DO
-				// read + error
+				errors = address_read_perror(arena, address);
+				if (errors == 1);
 				break;
 			case 6:
-				// TO DO 
-				// write + error
+				errors = address_write_perror(arena, address);
+				if (errors == 1);
 				break;
 			case 7:
 				pmap(arena);
