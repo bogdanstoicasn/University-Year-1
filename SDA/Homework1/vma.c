@@ -10,10 +10,6 @@ arena_t
 	arena->arena_size = size;
 	arena->alloc_list = dll_create(sizeof(block_t));
 	
-	list_t *list_blocks = arena->alloc_list;
-	
-	list_blocks->start_address = 0;
-	
 	return arena;
 }
 
@@ -135,7 +131,6 @@ alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 	miniblock_t *miniblock = malloc(sizeof(miniblock_t));
 
 	list_miniblocks->data_size = sizeof(miniblock_t);
-	list_miniblocks->start_address = address;
 
 	assign_for_alloc(miniblock, block, address, size);
 
@@ -195,7 +190,6 @@ alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 		dll_add_nth_node(mini_list, 0, miniblock);
 		present->size += size;
 		present->start_address = address;
-		
 		free(list_miniblocks);
 		free(block);
 		free(miniblock);
@@ -258,7 +252,7 @@ position_offset_miniblock(list_t *list, const uint64_t address)
 {
 	dll_node_t *curr = list->head;
 	uint64_t count = 0;
-	uint64_t poz = 0, size_dummies, dimension = list->size;
+	uint64_t poz = 0, dimension = list->size;
 	while (curr != NULL) {
 		count++;
 		miniblock_t *block_mini = curr->data;
@@ -282,7 +276,20 @@ free_block(arena_t* arena, const uint64_t address)
 {
 	int position = free_block_verifier(arena, address);
 	if (position == 0) {
-		//printf("inceput\n");
+		list_t *list_blocks = arena->alloc_list;
+		uint64_t position1 = position_identifier(list_blocks, address);
+		dll_node_t *node = get_node_by_poz(list_blocks, position1);
+		block_t *present = node->data;
+		list_t *mini_list = present->miniblock_list;
+		dll_node_t *delete = dll_remove_nth_node(mini_list, 0);
+		if (mini_list->head == NULL) {
+			free(mini_list);
+			dll_node_t *remover = dll_remove_nth_node(arena->alloc_list, position1);
+			free(remover);
+			free(present);
+		}
+		free(delete->data);
+		free(delete);
 		return;
 	}
 
@@ -291,7 +298,7 @@ free_block(arena_t* arena, const uint64_t address)
 		return;
 	}
 	if (position == 2) {
-		//printf("fina\n");
+
 		return;
 	}
 	return;
@@ -322,7 +329,9 @@ pmap(const arena_t *arena)
 		nr_mini += list_mini->size;
 		current = current->next;
 	}
-	printf("Number of allocated miniblocks: %d\n\n", nr_mini);
+	printf("Number of allocated miniblocks: %d\n", nr_mini);
+	if (nr_mini != 0) 
+		printf("\n");
 
 	int n = arena->alloc_list->size;
 	current = arena->alloc_list->head;
@@ -344,6 +353,8 @@ pmap(const arena_t *arena)
 		current = current->next;
 
 		printf("Block %d end\n", i);
+		if (i < n) 
+			printf("\n");
 	}
 }
 

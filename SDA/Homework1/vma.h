@@ -10,7 +10,6 @@ typedef struct dll_node_t
 
 
 typedef struct {
-    uint64_t start_address;
 	dll_node_t* head;
 	unsigned int data_size;
 	unsigned int size;
