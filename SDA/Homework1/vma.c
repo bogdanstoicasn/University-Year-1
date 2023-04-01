@@ -276,18 +276,24 @@ free_block(arena_t* arena, const uint64_t address)
 {
 	int position = free_block_verifier(arena, address);
 	list_t *list_blocks = arena->alloc_list;
-		uint64_t position1 = position_identifier(list_blocks, address);
-		dll_node_t *node = get_node_by_poz(list_blocks, position1);
+	uint64_t position1 = position_identifier(list_blocks, address);
+	dll_node_t *node = get_node_by_poz(list_blocks, position1);
 	if (position == 0) {
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
 		dll_node_t *delete = dll_remove_nth_node(mini_list, 0);
 		if (mini_list->head == NULL) {
-			free(mini_list);
 			dll_node_t *remover = dll_remove_nth_node(arena->alloc_list, position1);
+			free(mini_list);
 			free(remover);
 			free(present);
+			free(delete->data);
+		free(delete);
+		return;
 		}
+		miniblock_t *ofo = delete->data;
+		present->start_address = ofo->start_address + ofo->size;
+		present->size -= ofo->size;
 		free(delete->data);
 		free(delete);
 		return;
