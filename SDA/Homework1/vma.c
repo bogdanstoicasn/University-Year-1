@@ -259,7 +259,7 @@ position_offset_miniblock(list_t *list, const uint64_t address)
 		
 		if (address == block_mini->start_address) {
 			poz = count;
-			break;
+			//break;
 		}
 
 		curr = curr->next;
@@ -275,10 +275,10 @@ void
 free_block(arena_t* arena, const uint64_t address)
 {
 	int position = free_block_verifier(arena, address);
-	if (position == 0) {
-		list_t *list_blocks = arena->alloc_list;
+	list_t *list_blocks = arena->alloc_list;
 		uint64_t position1 = position_identifier(list_blocks, address);
 		dll_node_t *node = get_node_by_poz(list_blocks, position1);
+	if (position == 0) {
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
 		dll_node_t *delete = dll_remove_nth_node(mini_list, 0);
@@ -298,7 +298,7 @@ free_block(arena_t* arena, const uint64_t address)
 		return;
 	}
 	if (position == 2) {
-
+		//rintf("fina\n");
 		return;
 	}
 	return;
@@ -310,14 +310,14 @@ pmap(const arena_t *arena)
 	printf("Total memory: 0x%lX bytes\n", arena->arena_size);
 
 	dll_node_t *node_free = arena->alloc_list->head;
-  	int dim = 0;
+  	uint64_t dim = 0;
   	while (node_free != NULL) {
 		block_t *block = node_free->data;
     	dim += block->size;
     	node_free = node_free->next;
   	}
 	dim = arena->arena_size - dim;
-	printf("Free memory: 0x%X bytes\n", dim);
+	printf("Free memory: 0x%lX bytes\n", dim);
 
 	printf("Number of allocated blocks: %d\n", arena->alloc_list->size);
 
