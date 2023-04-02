@@ -212,7 +212,6 @@ alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 	uint64_t position = position_identifier(list_blocks, address);
 	dll_add_nth_node(list_blocks, position, block);
 	dll_add_nth_node(list_miniblocks, 0, miniblock);
-
 	free(block);
 	free(miniblock);
 }
@@ -283,42 +282,50 @@ free_block(arena_t* arena, const uint64_t address)
 	}
 
 	if (position == 1) { // we have to end it
-		return;
 		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1);
 		block_t *block = node->data;
 		list_t *list_mini = block->miniblock_list;
 		dll_node_t *curr = list_mini->head;
+		// get position in mini
 		while (curr != NULL) {
 			miniblock_t *miniblock = curr->data;
 			if (miniblock->start_address == address)
 				break;
 			curr = curr->next;
 		}
-		list_mini->size--;
-		block->size = ((miniblock_t*)curr->data)->start_address - block->start_address;
-		
+		block->size = address - block->start_address;
 		dll_node_t *previous = curr->prev;
-		dll_node_t *next = curr->next;
 		previous->next = NULL;
-		// works till here
-		// MALLOC NEW BLOCK 
-		block_t *new_block = malloc(sizeof(block_t));
-		list_t *new_mini_list = dll_create(sizeof(miniblock_t));
-		block->miniblock_list = new_mini_list;
-		new_mini_list->head = next;
-
-		new_block->start_address = ((miniblock_t*)(next->data))->start_address;
-		new_block->size = 0;
+		dll_node_t *next = curr->next;
+		dll_node_t *second_next = next->next;
 		dll_node_t *travel = next;
-		while (travel != NULL) {
-			miniblock_t *new_mini = travel->data;
-			new_block->size += new_mini->size;
+		uint64_t ok = 1, dimension = ((miniblock_t*)(next->data))->size;
+		while (travel->next != NULL) {
+			++ok;
+			dimension += ((miniblock_t*)(travel->data))->size;
 			travel = travel->next;
 		}
+		
+		list_mini->size = list_mini->size - ok - 1;
 
-		dll_add_nth_node(list_blocks, position1, new_block);
-		free(new_block);
-
+		alloc_block(arena, ((miniblock_t*)(next->data))->start_address, ((miniblock_t*)(next->data))->size);
+		dll_node_t *ofo = get_node_by_poz(list_blocks, position1);// poate este - 1
+		block_t *new_block = ofo->data;
+		list_t *new_list = new_block->miniblock_list;
+		dll_node_t *new_node = new_list->head;
+		if (ok == 1) new_list->size = 1;
+		else new_list->size += ok - 1;
+		free(next->data);
+		free(next);
+		free(curr->data);
+		free(curr);
+		new_node->next = second_next;
+		if (second_next == NULL) 
+			return;
+		
+		second_next->prev = new_node;
+		new_block->size = dimension;
+		
 		return;
 	}
 	if (position == 2) {
