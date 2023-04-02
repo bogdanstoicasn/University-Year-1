@@ -3,198 +3,317 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-#define NMAX 64
-int error_cmd(char copy_string[NMAX]);
-int interface_handler(int *address, int *size, char *pointer)
+#define NMAX 128
+
+int interface_handler(uint64_t *address, uint64_t *size, int8_t **pointer)
 {
-    char string[NMAX], copy_string[NMAX];
+    char string[NMAX];
 	
-    fgets(string, NMAX, stdin);
-	
-    for (size_t i = 0; i < strlen(string); i++)
-		if (string[i] == '\n')
-			string[i] = '\0';
+    scanf("%s",string);
 
 	if (strlen(string) == 0)
 		return 0;
 
-	strcpy(copy_string, string);
-
     char *p =strtok(string, " ");
 
     if (strcmp(p, "ALLOC_ARENA") == 0)
-        return arena_interface(copy_string, size);
+        return arena_interface(size);
 
     if (strcmp(p, "PMAP") == 0)
-        return pmap_interface(copy_string);
+        return pmap_interface();
 
     if (strcmp(p, "DEALLOC_ARENA") == 0)
-        return dealloc_arena_interface(copy_string);
-    
+        return dealloc_arena_interface();
+
     if (strcmp(p, "ALLOC_BLOCK") == 0)
-        return alloc_block_interface(copy_string, address, size);
+        return alloc_block_interface(address, size);
 
     if (strcmp(p, "FREE_BLOCK") == 0)
-        return free_block_interface(copy_string, address);
+        return free_block_interface(address);
 
     if (strcmp(p, "READ") == 0)
-        return read_interface(copy_string, address, size);
-    
-    return error_cmd(copy_string);
+        return read_interface(address, size);
+
+	if (strcmp(p, "WRITE") == 0)
+		return write_interface(address,size, pointer);
+
+
+	return 0;
 }
 void print_error(int ok)
 {
-    for (int i = 0; i < ok - 1; ++i)
+    for (int i = 0; i < ok; ++i)
         printf("Invalid command. Please try again.\n");
 }
-int error_cmd(char copy_string[NMAX])
-{
-    char *p = strtok(copy_string, " ");
-	int ok = 0;
-	while (p) {
-		++ok;
-		p = strtok(NULL, " ");
+
+int arena_interface(uint64_t *size)
+{  
+   char string[NMAX];
+    fgets(string, NMAX, stdin);
+
+    for (size_t i = 0; i < strlen(string); i++)
+		if (string[i] == '\n')
+			string[i] = '\0';
+
+    int ok = 0, spaces = 0;
+    for (size_t i = 0; i < strlen(string); i++) {
+        if (isalpha(string[i]) != 0)
+            ok++;
+
+		if (string[i] == ' ')
+			spaces++;  
+    }
+
+	if (spaces > 1) {
+		print_error(spaces);
+		return 0;
 	}
-    print_error(ok);
+
+	if (ok != 0) {
+		printf("Invalid command. Please try again.\n");
+		return 0;
+	}
+
+	uint64_t ch1 = -1;
+	int cc = 0;
+	char *p = strtok(string, " ");
+	while (p) {
+        if (cc == 0)
+            ch1 = atoi(p);
+        cc++;
+        p = strtok(NULL, " ");
+    }
+
+	*size = ch1;
+	return 1;
+}
+
+int pmap_interface()
+{
+    
+    char string[NMAX];
+    fgets(string, NMAX, stdin);
+
+    for (size_t i = 0; i < strlen(string); i++)
+		if (string[i] == '\n')
+			string[i] = '\0';
+     char *p = strtok(string, " ");
+     int ok = 0;
+     while (p) {
+        ok++;
+        printf("Invalid command. Please try again.\n");
+        p = strtok(NULL, " ");
+    }
+    if (ok == 0) 
+        return 7;
+
     return 0;
-}
-int arena_interface(char copy_string[NMAX], int *size)
+} // works
+
+int dealloc_arena_interface()
 {
-    char *p = strtok(copy_string, " ");
-	int ok = 0;
-	while (p) {
-		++ok;
-        if (ok == 2)
-            *size = atoi(p); 
-		p = strtok(NULL, " ");
-	}
+    char string[NMAX];
+    fgets(string, NMAX, stdin);
 
-    if (ok <= 1 || ok >= 3) {
-        print_error(ok);
-        return 0;
-    }
-
-    if (*size <= 0)
-        return 0;
-
-    return 1;
-}
-
-int pmap_interface(char copy_string[NMAX])
-{
-    char *p = strtok(copy_string, " ");
-    int ok = 0;
-    while (p) {
-        ++ok;
+    for (size_t i = 0; i < strlen(string); i++)
+		if (string[i] == '\n')
+			string[i] = '\0';
+     char *p = strtok(string, " ");
+     int ok = 0;
+     while (p) {
+        ok++;
+        printf("Invalid command. Please try again.\n");
         p = strtok(NULL, " ");
     }
-    if (ok != 1) {
-        print_error(ok);
-        return  0;
-    }
+    if (ok == 0) 
+        return 2;
 
-    return 7;
-}
+    return 0;
+} // works
 
-int dealloc_arena_interface(char copy_string[NMAX])
+int alloc_block_interface(uint64_t *address, uint64_t *size)
 {
-    char *p = strtok(copy_string, " ");
-    int ok = 0;
-    while (p) {
-        ++ok;
-        p = strtok(NULL, " ");
+    char string[NMAX];
+    fgets(string, NMAX, stdin);
+
+    for (size_t i = 0; i < strlen(string); i++)
+		if (string[i] == '\n')
+			string[i] = '\0';
+
+    int ok = 0, spaces = 0;
+    for (size_t i = 0; i < strlen(string); i++) {
+        if (isalpha(string[i]) != 0)
+            ok++;
+
+		if (string[i] == ' ')
+			spaces++;  
     }
-    if (ok != 1) {
-        print_error(ok);
-        return 0;
-    }
 
-    return 2;
-}
-
-int alloc_block_interface(char copy_string[NMAX], int *address, int *size)
-{
-    char *p = strtok(copy_string, " ");
-	int contor = 0, ch1 = -1, ch2 = -1, ok = 0;
-	while (p) {
-		if (p[0] >= 'A' && p[0] <= 'Z') {
-			ok++;
-		} else {
-			if (contor == 0)
-				ch1 = atoi(p);
-
-			if (contor == 1)
-				ch2 = atoi(p);
-
-			contor++;
-		}
-	p = strtok(NULL, " ");
+	if (spaces <= 1) {
+		printf("Invalid command. Please try again.\n");
+		return 0;
 	}
 
-	if (contor != 2) {
-        print_error(ok);
-        return 0;
-    }
+	if (spaces > 2) {
+		print_error(spaces);
+		return 0;
+	}
 
-    
-    
-    *address = ch1;
+	if (ok != 0) {
+		printf("Invalid command. Please try again.\n");
+		printf("Invalid command. Please try again.\n");
+		return 0;
+	}
+	uint64_t ch1 = -1, ch2 = -1;
+	int cc = 0;
+	char *p = strtok(string, " ");
+	while (p) {
+        if (cc == 0) {
+            ch1 = atoi(p);
+        } else if (cc == 1) {
+            ch2 = atoi(p);
+        }
+        cc++;
+        p = strtok(NULL, " ");
+    }
+	
+	*address = ch1;
 	*size = ch2;
-
 	return 3;
-}
+}// works
 
-int free_block_interface(char copy_string[NMAX], int *address)
+int free_block_interface(uint64_t *address)
 {
-    char *p = strtok(copy_string, " ");
-	int ok = 0;
-	while (p) {
-		++ok;
-        if (ok == 2)
-            *address = atoi(p); 
-		p = strtok(NULL, " ");
-	}
+    char string[NMAX];
+    fgets(string, NMAX, stdin);
 
-    if (ok <= 1 || ok >= 3) {
-        print_error(ok);
-        return 0;
+    for (size_t i = 0; i < strlen(string); i++)
+		if (string[i] == '\n')
+			string[i] = '\0';
+
+    int ok = 0, spaces = 0;
+    for (size_t i = 0; i < strlen(string); i++) {
+        if (isalpha(string[i]) != 0)
+            ok++;
+
+		if (string[i] == ' ')
+			spaces++;  
     }
 
-    if (*address < 0)
-        return 0;
-
-    return 4;
-}
-
-int read_interface(char copy_string[NMAX], int *address, int *size)
-{
-    char *p = strtok(copy_string, " ");
-	int contor = 0, ch1 = -1, ch2 = -1, ok = 0;
-	while (p) {
-		if (p[0] >= 'A' && p[0] <= 'Z') {
-			ok++;
-		} else {
-			if (contor == 0)
-				ch1 = atoi(p);
-
-			if (contor == 1)
-				ch2 = atoi(p);
-
-			contor++;
-		}
-	p = strtok(NULL, " ");
+	if (spaces > 1) {
+		print_error(spaces);
+		return 0;
 	}
 
-	if (contor != 2) {
-        print_error(ok);
-        return 0;
+	if (ok != 0) {
+		printf("Invalid command. Please try again.\n");
+		return 0;
+	}
+
+	uint64_t ch1 = -1;
+	int cc = 0;
+	char *p = strtok(string, " ");
+	while (p) {
+        if (cc == 0)
+            ch1 = atoi(p);
+        cc++;
+        p = strtok(NULL, " ");
     }
 
-    
-    
-    *address = ch1;
+	*address = ch1;
+	return 4;
+} //works
+
+int read_interface(uint64_t *address, uint64_t *size)
+{
+    char string[NMAX];
+    fgets(string, NMAX, stdin);
+
+    for (size_t i = 0; i < strlen(string); i++)
+		if (string[i] == '\n')
+			string[i] = '\0';
+
+    int ok = 0, spaces = 0;
+    for (size_t i = 0; i < strlen(string); i++) {
+        if (isalpha(string[i]) != 0)
+            ok++;
+
+		if (string[i] == ' ')
+			spaces++;  
+    }
+
+	if (spaces <= 1) {
+		printf("Invalid command. Please try again.\n");
+		return 0;
+	}
+
+	if (spaces > 2) {
+		print_error(spaces);
+		return 0;
+	}
+
+	if (ok != 0) {
+		printf("Invalid command. Please try again.\n");
+		printf("Invalid command. Please try again.\n");
+		return 0;
+	}
+	uint64_t ch1 = -1, ch2 = -1;
+	int cc = 0;
+	char *p = strtok(string, " ");
+	while (p) {
+        if (cc == 0) {
+            ch1 = atoi(p);
+        } else if (cc == 1) {
+            ch2 = atoi(p);
+        }
+        cc++;
+        p = strtok(NULL, " ");
+    }
+	
+	*address = ch1;
 	*size = ch2;
 
 	return 5;
+}
+
+int write_interface(uint64_t *address, uint64_t *size, int8_t **pointer)
+{
+    char string[NMAX];
+    scanf("%s", string);
+
+    int ok = 0;
+    for (size_t i = 0; i < strlen(string); ++i) {
+        if (isalpha(string[i]) != 0)
+            ok++;
+    }
+
+    if (ok != 0) {
+        printf("Invalid command. Please try again.\n");
+        return 0;
+    }
+    *address = atoi(string);
+    
+    scanf("%s", string);
+
+    ok = 0;
+    for (size_t i = 0; i < strlen(string); ++i) {
+        if (isalpha(string[i]) != 0)
+            ok++;
+    }
+
+    if (ok != 0) {
+        printf("Invalid command. Please try again.\n");
+        return 0;
+    }
+    *size = atoi(string);
+    char c = getchar();
+    *pointer = malloc(sizeof(int8_t) * (*size) + 1);
+    for (uint64_t i = 0; i < *size; i++) {
+        c = getchar();
+        (*pointer)[i] = c; // Fixed indexing of pointer
+    }
+    (*pointer)[*size] = '\0'; // Fixed indexing of pointer
+    return 6;
 }

@@ -1,17 +1,21 @@
 
+#include <inttypes.h>
+#define NMAX 128
 
-#define NMAX 64
 
-int interface_handler(int *address, int *size, char *pointer);
+int interface_handler(uint64_t *address, uint64_t *size, int8_t **pointer);
 
-int arena_interface(char copy_string[NMAX], int *size);
+int arena_interface(uint64_t *size);
 
-int pmap_interface(char copy_string[NMAX]);
+int pmap_interface();
 
-int dealloc_arena_interface(char copy_string[NMAX]);
+int dealloc_arena_interface();
 
-int alloc_block_interface(char copy_string[NMAX], int *address, int *size);
+int alloc_block_interface(uint64_t *address, uint64_t *size);
 
-int free_block_interface(char copy_string[NMAX], int *address);
+int free_block_interface(uint64_t *address);
 
-int read_interface(char copy_string[NMAX], int *address, int *size);
+int read_interface(uint64_t *address, uint64_t *size);
+
+int
+write_interface(uint64_t *address, uint64_t *size, int8_t **pointer);

@@ -3,16 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <inttypes.h>
 #define STRING_MAX 128
 
 int main()
 {
   	arena_t *arena = NULL;
-  	int ok = -1, address = -1, size = -1, errors = -1;
-  	char *pointer = NULL;
+  	uint64_t ok = -1, address = -1, size = -1, errors = -1;
+  	int8_t *pointer = NULL;
   	while (1) {
-    	ok = interface_handler(&address, &size, pointer);
+    	ok = interface_handler(&address, &size, &pointer);
     	switch (ok) {
 			case 0:
 				printf("Invalid command. Please try again.\n");
@@ -41,6 +41,7 @@ int main()
 			case 6:
 				errors = address_write_perror(arena, address);
 				if (errors == 1);
+				free(pointer);
 				break;
 			case 7:
 				pmap(arena);
