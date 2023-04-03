@@ -119,7 +119,6 @@ dll_free(list_t** pp_list)
     	dll_node_t *temp = current;
     
 		current = current->next;
-    
 		free(temp->data);
     	free(temp);
     

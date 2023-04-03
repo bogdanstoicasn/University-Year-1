@@ -23,7 +23,16 @@ dealloc_arena(arena_t* arena)
 	while (node != NULL) {
 		block_t *block = node->data;
 		list_t *second_list = block->miniblock_list;
-
+		dll_node_t *current = second_list->head;
+		while (current != NULL) {
+			miniblock_t *mini = current->data;
+			// if (mini->rw_buffer != NULL)
+			// 	printf("%s\n",(int8_t*)(mini->rw_buffer));
+			if (mini->rw_buffer != NULL)
+				free(mini->rw_buffer);
+			
+			current = current->next;
+		}
 		dll_free(&second_list);
 		node = node->next;
 	}
@@ -76,11 +85,11 @@ position_identifier(list_t *list_blocks, const uint64_t address)
     while (node != NULL) {
         block_t *block = node->data;
 		
-		if(address <= block->start_address) 
-			return position;
+		if(address <= block->start_address)
+			return position--;
 
 		node = node->next;
-		++position;
+		++position;// ++position
     }
 	return position;
 }
@@ -129,7 +138,7 @@ alloc_block(arena_t* arena, const uint64_t address, const uint64_t size)
 	block->miniblock_list = list_miniblocks;
 
 	miniblock_t *miniblock = malloc(sizeof(miniblock_t));
-
+	miniblock->rw_buffer = NULL;
 	list_miniblocks->data_size = sizeof(miniblock_t);
 
 	assign_for_alloc(miniblock, block, address, size);
@@ -329,7 +338,7 @@ free_block(arena_t* arena, const uint64_t address)
 		return;
 	}
 	if (position == 2) {
-		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1); //de vzt
+		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1);
 		block_t *block = node->data;
 		list_t *list_mini = block->miniblock_list;
 		dll_node_t *delete = dll_remove_nth_node(list_mini, list_mini->size - 1);
@@ -339,6 +348,111 @@ free_block(arena_t* arena, const uint64_t address)
 		return;
 	}
 	return;
+}
+
+void 
+write(arena_t* arena, const uint64_t address,  const uint64_t size, int8_t *data)
+{
+    dll_node_t *node = arena->alloc_list->head;
+    uint64_t poz = 0;
+    while (node->next != NULL) {
+        block_t *block = node->data;
+        uint64_t upper = block->size + block->start_address;
+        uint64_t lower = block->start_address;
+        if (address < upper && address >= lower)
+            break;
+        poz++;
+        node = node->next;
+    }
+    uint64_t fin = address + size;
+	//printf("fin === %lu", fin);
+    block_t *block = node->data;
+	uint64_t bll_size = block->size, bll_address = block->start_address;
+	//printf("%lu == %lu\n",bll_address, bll_size);
+    list_t *list_mini = block->miniblock_list;
+    dll_node_t *miniblock = list_mini->head;
+	miniblock_t *mini = miniblock->data;
+    uint64_t j = 0;
+
+    if (mini->size + mini->start_address < size + address) {
+        uint64_t dim = ((miniblock_t*)miniblock->data)->size + ((miniblock_t*)miniblock->data)->start_address - address;
+        printf("Warning: size was bigger than the block size. Writing %lu characters.\n", dim);
+    }
+    if (bll_address + bll_size <= fin)
+        fin =bll_address + bll_size - address;// + block->start_address;
+    
+    //printf("%lu === fin\n", fin);
+	fin += address;
+    for (uint64_t i = address; i < fin; i++) {
+        if (i >= mini->size + mini->start_address) {
+            // Move to next miniblock
+            miniblock = miniblock->next;
+            mini = miniblock->data;
+        }
+
+        // Allocate new buffer if necessary
+        if (mini->rw_buffer == NULL) {
+            mini->rw_buffer = calloc(mini->size, sizeof(int8_t));
+        }
+
+        // Write to buffer if miniblock contains memory region
+        ((int8_t*)mini->rw_buffer)[i - mini->start_address] = data[j++];
+    }
+}
+
+
+void
+read(arena_t* arena, uint64_t address, uint64_t size)
+{
+	dll_node_t *node = arena->alloc_list->head;
+	uint64_t poz = 0;
+	while (node->next != NULL) {
+		block_t *block = node->data;
+		uint64_t upper = block->size + block->start_address;
+		uint64_t lower = block->start_address;
+		if (address < upper && address >= lower)
+			break;
+		poz++;
+		node = node->next;
+	}
+
+	uint64_t add = address;
+	uint64_t fin = address + size;
+	block_t *block = node->data;
+	list_t *list_mini = block->miniblock_list;
+	dll_node_t *miniblock = list_mini->head;
+	//int ok = 0;
+	while (miniblock != NULL) {
+		miniblock_t *mini = miniblock->data;
+		uint64_t upper = mini->size + mini->start_address;
+		uint64_t lower = mini->start_address;
+		if (address < upper && address >= lower) 
+			break;
+
+		//++ok;
+		miniblock = miniblock->next;
+	}
+	//printf("%d === poz mini\n", ok);
+	if (((miniblock_t*)miniblock->data)->size + ((miniblock_t*)miniblock->data)->start_address < size + address) {
+        uint64_t dim = ((miniblock_t*)miniblock->data)->size + ((miniblock_t*)miniblock->data)->start_address - address;
+        printf("Warning: size was bigger than the block size. Reading %lu characters.\n", dim);
+    }
+
+	if (block->size + block->start_address <= fin)
+		fin = block->size + block->start_address - address;
+
+	miniblock_t *mini = miniblock->data;
+
+	for (uint64_t i = add; i < fin; i++) {
+    	if (i >= mini->size + mini->start_address) {
+        	// Move to next miniblock
+        	miniblock = miniblock->next;
+        	mini = miniblock->data;
+		}
+		if (((int8_t*)mini->rw_buffer)[i - mini->start_address] != 0)
+			printf("%c", ((int8_t*)mini->rw_buffer)[i - mini->start_address]);
+	}
+	printf("\n");
 }
 
 void 
@@ -485,7 +599,7 @@ address_read_perror(arena_t *arena, const uint64_t address)
 		uint64_t lower_limit = block->start_address;
 		uint64_t upper_limit = block->start_address + block->size;
 
-		if (address >= lower_limit && address <= upper_limit) {
+		if (address >= lower_limit && address < upper_limit) {
 			return 1;
 		}
 

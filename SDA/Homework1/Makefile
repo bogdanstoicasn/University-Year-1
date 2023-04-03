@@ -2,7 +2,7 @@
 # compilator
 
 CC = gcc
-CFLAGS = -Wall -Wextra  -std=c99
+CFLAGS = -Wall -Wextra -std=c99
 
 SOURCES = vma.c interface.c my_struct.c main.c
 OBJECTS = $(SOURCES:.c=.o)

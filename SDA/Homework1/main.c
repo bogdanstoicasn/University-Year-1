@@ -36,11 +36,13 @@ int main()
 				break;
 			case 5:
 				errors = address_read_perror(arena, address);
-				if (errors == 1);
+				if (errors == 1)
+					read(arena, address, size);
 				break;
 			case 6:
 				errors = address_write_perror(arena, address);
-				if (errors == 1);
+				if (errors == 1)
+					write(arena, address, size, pointer);
 				free(pointer);
 				break;
 			case 7:
