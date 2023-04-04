@@ -1,3 +1,4 @@
+// Copyright 2023-2024 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
 #include <inttypes.h>
 
 #define NMAX 128

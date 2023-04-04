@@ -1,8 +1,10 @@
+// Copyright 2023-2024 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "vma.h"
 
+// Create list
 list_t*
 dll_create(unsigned int data_size)
 {
@@ -17,6 +19,7 @@ dll_create(unsigned int data_size)
 	return new_node;
 }
 
+// Get node by address
 dll_node_t*
 get_node(list_t *list, const uint64_t address)
 {
@@ -33,6 +36,7 @@ get_node(list_t *list, const uint64_t address)
 	return NULL;
 }
 
+// Adds a node in a doubly linked list(non cyclic)
 void
 dll_add_nth_node(list_t *list, unsigned int n, const void *data)
 {
@@ -73,6 +77,7 @@ dll_add_nth_node(list_t *list, unsigned int n, const void *data)
 	list->size++;
 }
 
+// Removes a node from a doubly linked list(non cyclic)
 dll_node_t*
 dll_remove_nth_node(list_t *list, unsigned int n)
 {
@@ -101,6 +106,7 @@ dll_remove_nth_node(list_t *list, unsigned int n)
 	return current;
 }
 
+// Frees all the data from a doubly linked list
 void
 dll_free(list_t **pp_list)
 {

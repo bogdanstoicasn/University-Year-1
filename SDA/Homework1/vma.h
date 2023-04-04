@@ -1,3 +1,4 @@
+// Copyright 2023-2024 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
 #pragma once
 #include <inttypes.h>
 #include <stddef.h>

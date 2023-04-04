@@ -1,8 +1,8 @@
-####Copyright 2022-2023 Stoica Bogdan (bogdanstoicasn@yahoo.com)
+####Copyright 2023-2024 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
 # compilator
 
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99
+CFLAGS = -Wall -Wextra -Werror -std=c99
 
 SOURCES = vma.c interface.c my_struct.c main.c
 OBJECTS = $(SOURCES:.c=.o)

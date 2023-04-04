@@ -1,8 +1,10 @@
+// Copyright 2023-2024 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "vma.h"
 
+// Allocates arena :))
 arena_t*
 alloc_arena(const uint64_t size)
 {
@@ -13,6 +15,7 @@ alloc_arena(const uint64_t size)
 	return arena;
 }
 
+// Deallocates arena
 void
 dealloc_arena(arena_t *arena)
 {
@@ -21,18 +24,19 @@ dealloc_arena(arena_t *arena)
 	dll_node_t *node = first_head->head;
 
 	while (node) {
+		// Current block
 		block_t *block = node->data;
 		list_t *second_list = block->miniblock_list;
 		dll_node_t *current = second_list->head;
+		// Free for rw_buffer
 		while (current) {
 			miniblock_t *mini = current->data;
-			// if (mini->rw_buffer != NULL)
-			// printf("%s\n",(int8_t*)(mini->rw_buffer));
 			if (mini->rw_buffer)
 				free(mini->rw_buffer);
 
 			current = current->next;
 		}
+		// Free data from block
 		dll_free(&second_list);
 		node = node->next;
 	}
@@ -40,6 +44,7 @@ dealloc_arena(arena_t *arena)
 	free(arena);
 }
 
+// Checks if address is equal to end address of block
 int
 verify_address_final(arena_t *arena, const uint64_t address)
 {
@@ -59,6 +64,7 @@ verify_address_final(arena_t *arena, const uint64_t address)
 	return 0;
 }
 
+// Checks if address is equal to beginning address of the block
 int
 verify_address_beginning(arena_t *arena, const uint64_t address)
 {
@@ -75,6 +81,7 @@ verify_address_beginning(arena_t *arena, const uint64_t address)
 	return 0;
 }
 
+// Identifies position by address(may or may not work as intended)
 uint64_t
 position_identifier(list_t *list_blocks, const uint64_t address)
 {
@@ -93,6 +100,7 @@ position_identifier(list_t *list_blocks, const uint64_t address)
 	return position;
 }
 
+// Useless function to reduce lines for "alloc_block"
 void
 assign_for_alloc(miniblock_t *miniblock, block_t *block,
 				 const uint64_t address, const uint64_t size)
@@ -105,6 +113,7 @@ assign_for_alloc(miniblock_t *miniblock, block_t *block,
 	miniblock->perm = 6;
 }
 
+// Get address of a node/block by the position in list
 dll_node_t*
 get_node_by_poz(list_t *list, int n)
 {
@@ -121,6 +130,10 @@ get_node_by_poz(list_t *list, int n)
 	return NULL;
 }
 
+// Alloc the block
+// First we use the heap and alloc minblock, block, and the list of blocks
+// We have 5 cases: empty list, overlap at the beginning/final
+// with another/both block, different locations
 void
 alloc_block(arena_t *arena, const uint64_t address, const uint64_t size)
 {
@@ -146,20 +159,21 @@ alloc_block(arena_t *arena, const uint64_t address, const uint64_t size)
 	uint64_t address2 = address + size;
 	int overlap_begin = verify_address_beginning(arena, address2);
 	int overlap_final = verify_address_final(arena, address);
-	// IES 0 CAND ADRESA 2 este == adresa 1
+	// When block is between 2 blocks
+	// We unite them and free last block completely(don't free mini)
 	if (overlap_begin == 1 && overlap_final == 1) {
 		uint64_t position1 = position_identifier(list_blocks, address);
 		uint64_t position2 = position_identifier(list_blocks, address2);
 
 		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1);
 		dll_node_t *next_node = get_node_by_poz(list_blocks, position2);
-		// we set the miniblock to beginning of next block
+		// We set the miniblock to beginning of next block
 		block_t *next_block = next_node->data;
 		list_t *next_mini_list = next_block->miniblock_list;
 		dll_add_nth_node(next_mini_list, 0, miniblock);
 		next_block->size += size;
 		next_block->start_address = address;
-		// we then combine the previous miniblock list with the next one
+		// We then combine the previous miniblock list with the next one
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
 		dll_node_t *last = get_node_by_poz(mini_list, mini_list->size - 1);
@@ -186,7 +200,6 @@ alloc_block(arena_t *arena, const uint64_t address, const uint64_t size)
 		free(list_miniblocks); free(block); free(miniblock);
 		return;
 	}
-
 	if (overlap_final == 1) {
 		uint64_t position = position_identifier(list_blocks, address);
 		if (position <= 0)
@@ -205,11 +218,13 @@ alloc_block(arena_t *arena, const uint64_t address, const uint64_t size)
 	free(block); free(miniblock);
 }
 
+// Checks whether we can free the miniblock
 int
 free_block_verifier(arena_t *arena, const uint64_t address)
 {
 	dll_node_t *node = arena->alloc_list->head;
 
+	// Enter each block
 	while (node) {
 		block_t *block = node->data;
 
@@ -219,6 +234,7 @@ free_block_verifier(arena_t *arena, const uint64_t address)
 		node = node->next;
 	}
 
+	// Check address of miniblock
 	node = arena->alloc_list->head;
 	while (node) {
 		block_t *block = node->data;
@@ -239,13 +255,15 @@ free_block_verifier(arena_t *arena, const uint64_t address)
 	return 1;
 }
 
+// Function that frees the block
+// We have 3 cases: middle(1), final(2), beginning(0) position in block
 void
 free_block(arena_t *arena, const uint64_t address)
 {
 	int position = free_block_verifier(arena, address);
 	list_t *list_blocks = arena->alloc_list;
 	uint64_t position1 = position_identifier(list_blocks, address);
-	if (position == 0) {
+	if (position == 0) {// beginning of block
 		dll_node_t *node = get_node_by_poz(list_blocks, position1);
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
@@ -264,7 +282,7 @@ free_block(arena_t *arena, const uint64_t address)
 		free(delete->data); free(delete);
 		return;
 	}
-	if (position == 1) { // we have to end it
+	if (position == 1) { // middle of block
 		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1);
 		block_t *block = node->data;
 		list_t *list_mini = block->miniblock_list;
@@ -290,7 +308,7 @@ free_block(arena_t *arena, const uint64_t address)
 		}
 
 		list_mini->size = list_mini->size - ok - 1;
-
+		// Create the new nodes
 		alloc_block(arena, ((miniblock_t *)(next->data))->start_address,
 					((miniblock_t *)(next->data))->size);
 		dll_node_t *ofo = get_node_by_poz(list_blocks, position1);
@@ -311,7 +329,7 @@ free_block(arena_t *arena, const uint64_t address)
 		new_block->size = dimension;
 		return;
 	}
-	if (position == 2) {
+	if (position == 2) {// final of block
 		dll_node_t *node = get_node_by_poz(list_blocks, position1 - 1);
 		block_t *block = node->data;
 		list_t *list_mini = block->miniblock_list;
@@ -323,10 +341,12 @@ free_block(arena_t *arena, const uint64_t address)
 	}
 }
 
+// Write function
+// After 1 day I realised i needed to check if exist a next miniblock :()
 void
 write(arena_t *arena, const uint64_t address,  const uint64_t size,
 	  int8_t *data)
-{
+{	// *We get the block where we need to write
 	dll_node_t *node = arena->alloc_list->head;
 	uint64_t poz = 0;
 	while (node->next) {
@@ -339,29 +359,27 @@ write(arena_t *arena, const uint64_t address,  const uint64_t size,
 		node = node->next;
 	}
 	uint64_t fin = address + size;
-	//printf("fin === %lu", fin);
 	block_t *block = node->data;
 	uint64_t bll_size = block->size, bll_address = block->start_address;
-	//printf("%lu == %lu\n",bll_address, bll_size);
 	list_t *list_mini = block->miniblock_list;
 	dll_node_t *miniblock = list_mini->head;
 	miniblock_t *mini = miniblock->data;
 	uint64_t j = 0;
-
+	// position aquired*
+	// Error case
 	if (block->size + block->start_address < size + address) {
-		uint64_t dim = ((miniblock_t *)miniblock->data)->size +
-						((miniblock_t *)miniblock->data)->start_address
+		uint64_t dim = block->size +
+						block->start_address
 						- address;
 		printf("Warning: size was bigger than the block size. ");
 		printf("Writing %lu characters.\n", dim);
 	}
-
+	// Size + address >= fin, that means we make fin end address of block
 	if (bll_address + bll_size <= fin)
 		fin = bll_address + bll_size;
 
-	(void)0;
+	(void)0;// Useless (indentation error so we put here;0)
 
-	//int ok = 0;
 	for (uint64_t i = address; i < fin; i++) {
 		if (i >= mini->size + mini->start_address) {
 			// Move to next miniblock
@@ -372,18 +390,15 @@ write(arena_t *arena, const uint64_t address,  const uint64_t size,
 		}
 
 		// Allocate new buffer if necessary
-		if (!mini->rw_buffer) {
-			mini->rw_buffer = calloc(mini->size + 1, sizeof(int8_t));
-			((int8_t *)mini->rw_buffer)[mini->size] = '\0';
-		}
+		if (!mini->rw_buffer)
+			mini->rw_buffer = calloc(mini->size, sizeof(int8_t));
 
 		// Write to buffer if miniblock contains memory region
-		//printf("%c\t",data[j]);
 		((int8_t *)mini->rw_buffer)[i - mini->start_address] = data[j++];
-		//printf("start_add====%lu\n", i - mini->start_address);
 	}
 }
 
+// Read function
 void
 read(arena_t *arena, uint64_t address, uint64_t size)
 {
@@ -404,7 +419,7 @@ read(arena_t *arena, uint64_t address, uint64_t size)
 	block_t *block = node->data;
 	list_t *list_mini = block->miniblock_list;
 	dll_node_t *miniblock = list_mini->head;
-	//int ok = 0;
+
 	while (miniblock) {
 		miniblock_t *mini = miniblock->data;
 		uint64_t upper = mini->size + mini->start_address;
@@ -412,10 +427,9 @@ read(arena_t *arena, uint64_t address, uint64_t size)
 		if (address < upper && address >= lower)
 			break;
 
-		//++ok;
 		miniblock = miniblock->next;
 	}
-	//printf("%d === poz mini\n", ok);
+	// We got the miniblock from which we beginn to read
 	if (block->size +
 		block->start_address <
 		size + address) {
@@ -428,7 +442,7 @@ read(arena_t *arena, uint64_t address, uint64_t size)
 
 	if (block->size + block->start_address <= fin)
 		fin = block->size + block->start_address;
-
+	// Start of reading
 	miniblock_t *mini = miniblock->data;
 	for (uint64_t i = add; i < fin; i++) {
 		if (i >= mini->size + mini->start_address) {
@@ -436,13 +450,15 @@ read(arena_t *arena, uint64_t address, uint64_t size)
 			miniblock = miniblock->next;
 			mini = miniblock->data;
 		}
-
+		// Print if it's not NULL
 		if (((int8_t *)mini->rw_buffer)[i - mini->start_address] != 0)
 			printf("%c", ((int8_t *)mini->rw_buffer)[i - mini->start_address]);
 	}
 	printf("\n");
 }
 
+// Output to PMAP
+// No explanations needed
 void
 pmap(const arena_t *arena)
 {
@@ -500,6 +516,8 @@ pmap(const arena_t *arena)
 	}
 }
 
+// FROM HERE ARE FUNCTIONS MADE FOR ERROR CASES IN ADDRESS, SIZE
+// Checks if the size, address are correct(are valid)
 int
 alloc_block_perrror(arena_t *arena, const uint64_t address, const uint64_t size)
 {
@@ -546,6 +564,7 @@ alloc_block_perrror(arena_t *arena, const uint64_t address, const uint64_t size)
 	return 1;
 }
 
+// Checks if address is start address of miniblock else error
 int
 address_free_perror(arena_t *arena, const uint64_t address)
 {
@@ -573,6 +592,7 @@ address_free_perror(arena_t *arena, const uint64_t address)
 	return 0;
 }
 
+// Checks if address exists(between start and end address)
 int
 address_read_perror(arena_t *arena, const uint64_t address)
 {
@@ -597,6 +617,7 @@ address_read_perror(arena_t *arena, const uint64_t address)
 	return 0;
 }
 
+// Same as read
 int
 address_write_perror(arena_t *arena, const uint64_t address)
 {
@@ -611,7 +632,7 @@ address_write_perror(arena_t *arena, const uint64_t address)
 		uint64_t lower_limit = block->start_address;
 		uint64_t upper_limit = block->start_address + block->size;
 
-		if (address >= lower_limit && address <= upper_limit)
+		if (address >= lower_limit && address < upper_limit)
 			return 1;
 
 		current = current->next;
