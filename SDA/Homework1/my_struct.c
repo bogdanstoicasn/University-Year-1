@@ -3,13 +3,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vma.h"
+#include <errno.h>
+#define DIE(assertion, call_description)				\
+	do {								\
+		if (assertion) {					\
+			fprintf(stderr, "(%s, %d): ",			\
+					__FILE__, __LINE__);		\
+			perror(call_description);			\
+			exit(errno);				        \
+		}							\
+	} while (0)
 
 // Create list
 list_t*
 dll_create(unsigned int data_size)
 {
 	list_t *new_node = malloc(sizeof(list_t));
-
+	DIE(!new_node, "failed\n");
 	new_node->head = NULL;
 
 	new_node->data_size = data_size;
@@ -41,7 +51,7 @@ void
 dll_add_nth_node(list_t *list, unsigned int n, const void *data)
 {
 	dll_node_t *new_node = malloc(sizeof(dll_node_t));
-
+	DIE(!new_node, "failed\n");
 	new_node->data = malloc(list->data_size);
 	memcpy(new_node->data, data, list->data_size);
 

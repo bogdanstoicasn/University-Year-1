@@ -9,6 +9,9 @@ arena_t*
 alloc_arena(const uint64_t size)
 {
 	arena_t *arena = malloc(sizeof(arena_t));
+
+	DIE(!arena, "failed\n");
+
 	arena->arena_size = size;
 	arena->alloc_list = dll_create(sizeof(block_t));
 
@@ -142,18 +145,19 @@ alloc_block(arena_t *arena, const uint64_t address, const uint64_t size)
 
 	list_t *list_blocks = arena->alloc_list;
 	block_t *block = malloc(sizeof(block_t));
+	DIE(!block, "failed\n");
 	list_t *list_miniblocks;
 	list_miniblocks = dll_create(sizeof(miniblock_t));
 	block->miniblock_list = list_miniblocks;
 	miniblock_t *miniblock = malloc(sizeof(miniblock_t));
+	DIE(!miniblock, "failed\n");
 	miniblock->rw_buffer = NULL;
 	list_miniblocks->data_size = sizeof(miniblock_t);
 	assign_for_alloc(miniblock, block, address, size);
 	if (!list_blocks->head) {
 		dll_add_nth_node(list_blocks, 0, block);
 		dll_add_nth_node(list_miniblocks, 0, miniblock);
-		free(block);
-		free(miniblock);
+		free(block); free(miniblock);
 		return;
 	}
 	uint64_t address2 = address + size;
@@ -184,8 +188,7 @@ alloc_block(arena_t *arena, const uint64_t address, const uint64_t size)
 		present->size += next_block->size;
 
 		free(next_mini_list); free(next_block);
-		free(list_miniblocks); free(miniblock);
-		free(block);
+		free(list_miniblocks); free(miniblock); free(block);
 		dll_remove_nth_node(list_blocks, position2); free(next_node);
 		return;
 	}
@@ -202,8 +205,6 @@ alloc_block(arena_t *arena, const uint64_t address, const uint64_t size)
 	}
 	if (overlap_final == 1) {
 		uint64_t position = position_identifier(list_blocks, address);
-		if (position <= 0)
-			position = 1;
 		dll_node_t *node = get_node_by_poz(list_blocks, position - 1);
 		block_t *present = node->data;
 		list_t *mini_list = present->miniblock_list;
@@ -390,8 +391,10 @@ write(arena_t *arena, const uint64_t address,  const uint64_t size,
 		}
 
 		// Allocate new buffer if necessary
-		if (!mini->rw_buffer)
+		if (!mini->rw_buffer) {
 			mini->rw_buffer = calloc(mini->size, sizeof(int8_t));
+			DIE(!mini->rw_buffer, "failed\n");
+		}
 
 		// Write to buffer if miniblock contains memory region
 		((int8_t *)mini->rw_buffer)[i - mini->start_address] = data[j++];

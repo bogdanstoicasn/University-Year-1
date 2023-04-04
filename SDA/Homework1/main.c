@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#define STRING_MAX 128
 
 int main(void)
 {

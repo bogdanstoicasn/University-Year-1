@@ -319,6 +319,8 @@ int write_interface(uint64_t *address, uint64_t *size, int8_t **pointer)
 	*size = atoll(string);
 	char c = getchar();
 	*pointer = malloc(sizeof(int8_t) * (*size) + 1);
+	if (!*pointer)
+		return 0;
 	for (uint64_t i = 0; i < *size; i++) {
 		c = getchar();
 		(*pointer)[i] = c; // Fixed indexing of pointer

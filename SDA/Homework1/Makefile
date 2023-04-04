@@ -1,4 +1,4 @@
-####Copyright 2023-2024 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
+#### Copyright 2023-2024 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
 # compilator
 
 CC = gcc
@@ -24,6 +24,6 @@ clean:
 	rm -f $(EXECUTABLE) $(OBJECTS)
 
 pack:
-	zip -FSr 315CA_StoicaMihaiBogdan_Tema3.zip README Makefile *.c *.h
+	zip -FSr 315CA_StoicaMihaiBogdan_Tema1.zip README Makefile *.c *.h
 	
 .PHONY: pack clean build
