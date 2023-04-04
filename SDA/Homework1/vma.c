@@ -348,7 +348,7 @@ write(arena_t *arena, const uint64_t address,  const uint64_t size,
 	miniblock_t *mini = miniblock->data;
 	uint64_t j = 0;
 
-	if (mini->size + mini->start_address < size + address) {
+	if (block->size + block->start_address < size + address) {
 		uint64_t dim = ((miniblock_t *)miniblock->data)->size +
 						((miniblock_t *)miniblock->data)->start_address
 						- address;
@@ -360,22 +360,27 @@ write(arena_t *arena, const uint64_t address,  const uint64_t size,
 		fin = bll_address + bll_size;
 
 	(void)0;
-	fin += address;
 
-	//return;
+	//int ok = 0;
 	for (uint64_t i = address; i < fin; i++) {
 		if (i >= mini->size + mini->start_address) {
 			// Move to next miniblock
 			miniblock = miniblock->next;
+			if (!miniblock)
+				return;
 			mini = miniblock->data;
 		}
 
 		// Allocate new buffer if necessary
-		if (!mini->rw_buffer)
-			mini->rw_buffer = calloc(mini->size, sizeof(int8_t));
+		if (!mini->rw_buffer) {
+			mini->rw_buffer = calloc(mini->size + 1, sizeof(int8_t));
+			((int8_t *)mini->rw_buffer)[mini->size] = '\0';
+		}
 
 		// Write to buffer if miniblock contains memory region
+		//printf("%c\t",data[j]);
 		((int8_t *)mini->rw_buffer)[i - mini->start_address] = data[j++];
+		//printf("start_add====%lu\n", i - mini->start_address);
 	}
 }
 
@@ -411,21 +416,20 @@ read(arena_t *arena, uint64_t address, uint64_t size)
 		miniblock = miniblock->next;
 	}
 	//printf("%d === poz mini\n", ok);
-	if (((miniblock_t *)miniblock->data)->size +
-		((miniblock_t *)miniblock->data)->start_address <
+	if (block->size +
+		block->start_address <
 		size + address) {
-		uint64_t dim = ((miniblock_t *)miniblock->data)->size +
-					   ((miniblock_t *)miniblock->data)->start_address -
+		uint64_t dim = block->size +
+					   block->start_address -
 						address;
-		printf("Warning: size was bigger than the block size.");
+		printf("Warning: size was bigger than the block size. ");
 		printf("Reading %lu characters.\n", dim);
 	}
 
 	if (block->size + block->start_address <= fin)
-		fin = block->size + block->start_address - address;
+		fin = block->size + block->start_address;
 
 	miniblock_t *mini = miniblock->data;
-
 	for (uint64_t i = add; i < fin; i++) {
 		if (i >= mini->size + mini->start_address) {
 			// Move to next miniblock
@@ -433,12 +437,8 @@ read(arena_t *arena, uint64_t address, uint64_t size)
 			mini = miniblock->data;
 		}
 
-		if (((int8_t *)mini->rw_buffer)[i - mini->start_address] != 0) {
+		if (((int8_t *)mini->rw_buffer)[i - mini->start_address] != 0)
 			printf("%c", ((int8_t *)mini->rw_buffer)[i - mini->start_address]);
-		} else {
-			printf("\n");
-			return;
-		}
 	}
 	printf("\n");
 }
