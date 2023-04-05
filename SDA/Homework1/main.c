@@ -9,7 +9,7 @@
 int main(void)
 {
 	arena_t *arena = NULL;
-	uint64_t ok = -1, address = -1, size = -1, errors = -1;
+	uint64_t ok = 0, address = 0, size = 0, errors = 0;
 	int8_t *pointer = NULL;
 	while (1) {
 		ok = interface_handler(&address, &size, &pointer);

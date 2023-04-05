@@ -451,9 +451,12 @@ read(arena_t *arena, uint64_t address, uint64_t size)
 		if (i >= mini->size + mini->start_address) {
 			// Move to next miniblock
 			miniblock = miniblock->next;
+			if (!miniblock)
+				return;
 			mini = miniblock->data;
 		}
-		// Print if it's not NULL
+		if (!mini->rw_buffer)
+			break;
 		if (((int8_t *)mini->rw_buffer)[i - mini->start_address] != 0)
 			printf("%c", ((int8_t *)mini->rw_buffer)[i - mini->start_address]);
 	}
