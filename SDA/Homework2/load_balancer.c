@@ -209,17 +209,14 @@ void loader_remove_server(load_balancer *main, int server_id)
 		}
 	}
 	// remove the server from the load balancer
-	for (unsigned int i = index1; i < main->size - 1; i++) {
+	for (unsigned int i = index1; i < main->size - 1; i++)
 		main->server[i] = main->server[i + 1];
-	}
 	main->size--;
-	for (unsigned int i = index2 - 1 ; i < main->size - 1; i++) {
+	for (unsigned int i = index2 - 1 ; i < main->size - 1; i++)
 		main->server[i] = main->server[i + 1];
-	}
 	main->size--;
-	for (unsigned int i = index3 - 2; i < main->size - 1; i++) {
+	for (unsigned int i = index3 - 2; i < main->size - 1; i++)
 		main->server[i] = main->server[i + 1];
-	}
 	main->size--;
 	main->server = realloc(main->server, main->size * sizeof(server_memory *));
 	
@@ -273,7 +270,7 @@ void loader_store(load_balancer *main, char *key, char *value, int *server_id)
 	unsigned int index = hash_determine_cyclic(main, hash);
 	server_memory *server = main->server[index];
 	*server_id = server->server_id;
-	//printf("hash == %u\n", hash);
+
 	unsigned int key_len = strlen(key) / sizeof(char);
 	unsigned int value_len = strlen(value) / sizeof(char);
 
@@ -297,10 +294,6 @@ char *loader_retrieve(load_balancer *main, char *key, int *server_id)
 
 void free_load_balancer(load_balancer *main) 
 {
-	// for (unsigned int i = 0; i < main->size; i++) {
-	// 	server_memory *server_tmp = main->server[i];
-	// 	printf("id==%u replica==%u hash==%u\n", server_tmp->server_id, server_tmp->replica_number, server_tmp->hash);
-	// }
 	for (unsigned int i = 0; i < main->size; i++) {
 		server_memory *server = main->server[i];
 		hashtable_t *ht = server->ht;
