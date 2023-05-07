@@ -13,12 +13,16 @@ struct load_balancer {
 	unsigned int size;
 };
 struct server_memory {
-	unsigned int server_id;
+	int server_id;
 	unsigned int replica_number;
 	unsigned int hash;
 	hashtable_t *ht;
 };
-
+void print_server_cc(server_memory *server)
+{
+	printf("La print server\n");
+	printf("server_id==%u replica_number==%u hash==%u\n", server->server_id, server->replica_number, server->hash);
+}
 unsigned int hash_function_servers(void *a) {
     unsigned int uint_a = *((unsigned int *)a);
 
@@ -98,42 +102,169 @@ void loader_add_server(load_balancer *main, int server_id)
 		}
 	}
 	// sa fac remaparea cand se adauga server nou
-	// unsigned int index1, index2, index3;
-	// for (unsigned int i = 0; i < main->size; i++) {
-	// 	server_memory *servus = main->server[i];
-	// 	if (servus->server_id == server_id && servus->replica_number == 0)
-	// 		index1 = i;
-	// 	if (servus->server_id == server_id && servus->replica_number == 1)
-	// 		index2 = i;
-	// 	if (servus->server_id == server_id && servus->replica_number == 2)
-	// 		index3 = i;
-	// }
-	// if (main->size == 3)
-	// 	return;
-	// index1 = checker_for_index(main, index1);
-	// index2 = checker_for_index(main, index2);
-	// index3 = checker_for_index(main, index3);
+	unsigned int index1, index2, index3;
+	//server_memory *server1, *server2, *server3;
+	int ok = 0;
+	for (unsigned int i = 0; i < main->size; i++) {
+		server_memory *server = main->server[i];
+		if (ok == 0 && server->server_id == server_id) {
+			index1 = i;
+			ok = 1;
+			continue;
+		}
+		if (ok == 1 && server->server_id == server_id) {
+			index2 = i;
+			ok = 2;
+			continue;
+		}
+		if (ok == 2 && server->server_id == server_id) {
+			index3 = i;
+			ok = 3;
+			continue;
+		}
+	}
+	if (main->size == 3)
+		return;
+	index1 = checker_for_index(main, index1);
+	index2 = checker_for_index(main, index2);
+	index3 = checker_for_index(main, index3);
+	// printf("index1==%u index2==%u index3==%u\n", index1, index2, index3);
+	server1 = main->server[index1];
+	server2 = main->server[index2];
+	server3 = main->server[index3];
+	// aci
+	hashtable_t *ht1 = server1->ht;
+	hashtable_t *ht2 = server2->ht;
+	hashtable_t *ht3 = server3->ht;
+	// aci
+	server1->ht = ht_create(64, hash_function_key, compare_function_key, key_val_free_function);
+	server2->ht = ht_create(64, hash_function_key, compare_function_key, key_val_free_function);
+	server3->ht = ht_create(64, hash_function_key, compare_function_key, key_val_free_function);
 
-	// server1 = main->server[index1];
-	// server2 = main->server[index2];
-	// server3 = main->server[index3];
-	
-	// hashtable_t *ht = server1->ht;
-	// for (int i = 0; i < 64; ++i) {
-	// 	linked_list_t *list = ht->buckets[i];
-	// 	ll_node_t *node = list->head;
-	// 	while (node) {
-	// 		info *information = node->data;
-	// 		unsigned int hash = hash_function_key(information->key);
-	// 		unsigned int index = hash_determine_cyclic(main, hash);
+	for (int i = 0; i < 64; ++i) {
+		linked_list_t *list = ht1->buckets[i];
+		ll_node_t *node = list->head;
+		while (node) {
+			info *information = node->data;
+			char *key = information->key;
+			char *value = information->value;
+			loader_store(main, key, value, &server_id);
+			node = node->next;
+		}
+	}
 
-	// 	}
-	// }
+	for (int i = 0; i < 64; ++i) {
+		linked_list_t *list = ht2->buckets[i];
+		ll_node_t *node = list->head;
+		while (node) {
+			info *information = node->data;
+			char *key = information->key;
+			char *value = information->value;
+			loader_store(main, key, value, &server_id);
+			node = node->next;
+		}
+	}
+
+	for (int i = 0; i < 64; ++i) {
+		linked_list_t *list = ht3->buckets[i];
+		ll_node_t *node = list->head;
+		while (node) {
+			info *information = node->data;
+			char *key = information->key;
+			char *value = information->value;
+			loader_store(main, key, value, &server_id);
+			node = node->next;
+		}
+	}
+
+	ht_free(ht1);
+	ht_free(ht2);
+	ht_free(ht3);
 }
 
 void loader_remove_server(load_balancer *main, int server_id) 
 {
-    /* TODO 3 */
+	int ok = 0;
+	unsigned int index1, index2, index3;
+	server_memory *server1, *server2, *server3;
+	for (unsigned int i = 0; i < main->size; i++) {
+		server_memory *server = main->server[i];
+		if (ok == 0 && server->server_id == server_id) {
+			server1 = server;
+			index1 = i;
+			ok = 1;
+			continue;
+		}
+		if (ok == 1 && server->server_id == server_id) {
+			server2 = server;
+			index2 = i;
+			ok = 2;
+			continue;
+		}
+		if (ok == 2 && server->server_id == server_id) {
+			server3 = server;
+			index3 = i;
+			ok = 3;
+			continue;
+		}
+	}
+	// remove the server from the load balancer
+	for (unsigned int i = index1; i < main->size - 1; i++) {
+		main->server[i] = main->server[i + 1];
+	}
+	main->size--;
+	for (unsigned int i = index2 - 1 ; i < main->size - 1; i++) {
+		main->server[i] = main->server[i + 1];
+	}
+	main->size--;
+	for (unsigned int i = index3 - 2; i < main->size - 1; i++) {
+		main->server[i] = main->server[i + 1];
+	}
+	main->size--;
+	main->server = realloc(main->server, main->size * sizeof(server_memory *));
+	
+	hashtable_t *ht1 = server1->ht;
+
+	for (int i = 0; i < 64; ++i) {
+		linked_list_t *list = ht1->buckets[i];
+		ll_node_t *node = list->head;
+		while (node) {
+			info *information = node->data;
+			char *key = information->key;
+			char *value = information->value;
+			loader_store(main, key, value, &server_id);
+			node = node->next;
+		}
+	}
+
+	hashtable_t *ht2 = server2->ht;
+	for (int i = 0; i < 64; ++i) {
+		linked_list_t *list = ht2->buckets[i];
+		ll_node_t *node = list->head;
+		while (node) {
+			info *information = node->data;
+			char *key = information->key;
+			char *value = information->value;
+			loader_store(main, key, value, &server_id);
+			node = node->next;
+		}
+	}
+
+	hashtable_t *ht3 = server3->ht;
+	for (int i = 0; i < 64; ++i) {
+		linked_list_t *list = ht3->buckets[i];
+		ll_node_t *node = list->head;
+		while (node) {
+			info *information = node->data;
+			char *key = information->key;
+			char *value = information->value;
+			loader_store(main, key, value, &server_id);
+			node = node->next;
+		}
+	}
+	free_server_memory(server1);
+	free_server_memory(server2);
+	free_server_memory(server3);
 }
 
 void loader_store(load_balancer *main, char *key, char *value, int *server_id) 
@@ -142,7 +273,7 @@ void loader_store(load_balancer *main, char *key, char *value, int *server_id)
 	unsigned int index = hash_determine_cyclic(main, hash);
 	server_memory *server = main->server[index];
 	*server_id = server->server_id;
-	// printf("hash == %u\n", hash);
+	//printf("hash == %u\n", hash);
 	unsigned int key_len = strlen(key) / sizeof(char);
 	unsigned int value_len = strlen(value) / sizeof(char);
 

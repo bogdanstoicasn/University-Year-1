@@ -32,10 +32,31 @@ char *server_retrieve(server_memory *server, char *key) {
 	return NULL;
 }
 
-void server_remove(server_memory *server, char *key) {
-	/* TODO 4 */
+void server_remove(server_memory *server, char *key)
+{
+
 }
 
-void free_server_memory(server_memory *server) {
-	/* TODO 5 */
+void free_server_memory(server_memory *server)
+{
+	hashtable_t *ht = server->ht;
+		for (int i = 0; i < 64; i++) {
+			linked_list_t *list = ht->buckets[i];
+			// dam free la lista, node si data, data->key, data->value
+			ll_node_t *node = list->head;
+			while (node) {
+				info *information = node->data;
+				free(information->key);
+				free(information->value);
+				free(information);
+
+				ll_node_t *aux = node;
+				node = node->next;
+				free(aux);
+			}
+			free(list);
+		}
+		free(ht->buckets);
+		free(ht);
+		free(server);
 }

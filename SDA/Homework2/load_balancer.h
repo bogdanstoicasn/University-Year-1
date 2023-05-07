@@ -91,4 +91,5 @@ void loader_remove_server(load_balancer *main, int server_id);
 unsigned int hash_determine_cyclic(load_balancer *main, unsigned int hash);
 
 unsigned int checker_for_index(load_balancer *main, unsigned int index);
+
 #endif /* LOAD_BALANCER_H_ */
