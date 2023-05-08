@@ -1,4 +1,4 @@
-/* Copyright 2023 <> */
+/* Copyright 2023 <315CA_StoicaMihaiBogdan> */
 #ifndef UTILS_H_
 #define UTILS_H_
 

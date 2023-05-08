@@ -1,4 +1,4 @@
-/* Copyright 2023 <> */
+/* Copyright 2023 <315CA_StoicaMihaiBogdan> */
 #ifndef SERVER_H_
 #define SERVER_H_
 

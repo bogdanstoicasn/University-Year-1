@@ -1,4 +1,4 @@
-/* Copyright 2023 <> */
+/* Copyright 2023 <315CA_StoicaMihaiBogdan> */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

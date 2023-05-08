@@ -1,4 +1,4 @@
-
+/* Copyright 2023 <315CA_StoicaMihaiBogdan> */
 #define HMAX 100000
 
 typedef struct ll_node_t
@@ -16,7 +16,8 @@ typedef struct linked_list_t
 
 linked_list_t *ll_create(unsigned int data_size);
 
-void ll_add_nth_node(linked_list_t* list, unsigned int n, const void* new_data);
+void ll_add_nth_node(linked_list_t* list, unsigned int n,
+					 const void* new_data);
 
 ll_node_t *ll_remove_nth_node(linked_list_t* list, unsigned int n);
 
@@ -34,15 +35,15 @@ struct info {
 
 typedef struct hashtable_t hashtable_t;
 struct hashtable_t {
-	linked_list_t **buckets; /* Array de liste simplu-inlantuite. */
-	/* Nr. total de noduri existente curent in toate bucket-urile. */
+	linked_list_t **buckets;
+
 	unsigned int size;
-	unsigned int hmax; /* Nr. de bucket-uri. */
-	/* (Pointer la) Functie pentru a calcula valoarea hash asociata cheilor. */
+	unsigned int hmax;
+
 	unsigned int (*hash_function)(void*);
-	/* (Pointer la) Functie pentru a compara doua chei. */
+
 	int (*compare_function)(void*, void*);
-	/* (Pointer la) Functie pentru a elibera memoria ocupata de cheie si valoare. */
+
 	void (*key_val_free_function)(void*);
 };
 
