@@ -7,21 +7,31 @@
 #include "utils.h"
 #include "insert.h"
 
-void insert_function(dictionary *dict, char *word)
-{
-	int index = word[0] - 'a';
-	
-	character_entry *entry = dict->data[index];
+void insert_function(dictionary *dict, char *word) {
+    int index = word[0] - 'a';
 
-	for(int i = 0; i < entry->size; ++i) {
-		word_entry *word_exis = entry->data[i];
-		if(strcmp(word_exis->word, word) == 0) {
-			word_exis->frequency++;
-			return;
-		}
-	}
+    character_entry *entry = dict->data[index];
 
-	word_entry *new_word = malloc(sizeof(word_entry));
+    // Perform binary search to check if the word already exists
+    int left = 0;
+    int right = entry->size - 1;
+
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        word_entry *word_exis = entry->data[mid];
+        int cmp = strcmp(word_exis->word, word);
+
+        if (cmp == 0) {
+            word_exis->frequency++;
+            return;
+        } else if (cmp < 0) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+
+    word_entry *new_word = malloc(sizeof(word_entry));
 	DIE(new_word == NULL, "Error allocating memory for new word");
 
 	new_word->word = malloc(strlen(word) + 1);
