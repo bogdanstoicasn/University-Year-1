@@ -19,7 +19,7 @@ remove.c, mk.c
 > autocomplete.h, autocorrect.h, insert.h, interafce.h, load.h, my_struct.h,
 remove.c, utils.h
 
-There may be constant definitions such as**MAX_STRING_SIZE**with a value of 64
+There may be constant definitions such as **MAX_STRING_SIZE** with a value of 64
 
 ## Magic Keyboard
 
