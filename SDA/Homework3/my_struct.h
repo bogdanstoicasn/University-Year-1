@@ -3,27 +3,25 @@
 #define MY_STRUCT_H
 
 typedef struct {
-   void **data;
-   int size;
-}dictionary;
+	void **data;
+	int size;
+} dictionary;
 
 typedef struct {
 	void **data;
 	int size;
-}character_entry;
+} character_entry;
 
 typedef struct {
 	void *word;
 	int frequency;
-}word_entry;
+} word_entry;
 
-dictionary *create_dictionary();
+dictionary *create_dictionary(void);
 
 void dictionary_destructor(dictionary *dict);
 
-character_entry *init_character_entry();
-
-int compare_strings(const void* a, const void* b);
+int compare_strings(const void *a, const void *b);
 
 void dictionary_printer(dictionary *dict);
 

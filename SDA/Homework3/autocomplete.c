@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "utils.h"
 #include "my_struct.h"
 #include "autocomplete.h"
 
-
+// function that returns most frequent word, lexicographically smallest word
+// and shortest word based on the prefix
 void autocomplete_function(dictionary *dict, char *prefix, int n)
 {
 	int index = prefix[0] - 'a', frecq = 0, ok = 0;
@@ -14,7 +16,7 @@ void autocomplete_function(dictionary *dict, char *prefix, int n)
 	char *little_word = NULL, *freq_word = NULL, *lexico_word = NULL;
 	character_entry *entry = dict->data[index];
 
-	for (int i = 0; i <entry->size; ++i) {
+	for (int i = 0; i < entry->size; ++i) {
 		word_entry *word = entry->data[i];
 		char *word_str = word->word;
 		if (strncmp(word_str, prefix, strlen(prefix)) == 0) {
@@ -22,6 +24,10 @@ void autocomplete_function(dictionary *dict, char *prefix, int n)
 			if (strlen(word_str) < min_size) {
 				min_size = strlen(word_str);
 				little_word = word_str;
+				if (strlen(word_str) == 1 && n == 1) {
+					printf("%s\n", little_word);
+					return;
+				}
 			}
 
 			if (word->frequency > frecq) {
@@ -31,6 +37,10 @@ void autocomplete_function(dictionary *dict, char *prefix, int n)
 			if (ok == 0) {
 				++ok;
 				lexico_word = word_str;
+				if (n == 1) {
+					printf("%s\n", lexico_word);
+					return;
+				}
 			}
 		}
 	}
@@ -42,10 +52,6 @@ void autocomplete_function(dictionary *dict, char *prefix, int n)
 			printf("No words found\n");
 			return;
 		}
-		return;
-	}
-	if (n == 1) {
-		printf("%s\n", lexico_word);
 		return;
 	}
 

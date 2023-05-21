@@ -21,9 +21,11 @@ int
 command_typo_remove(char string[MAX_STRING_SIZE], char word[MAX_STRING_SIZE]);
 
 int
-command_typo_correct(char string[MAX_STRING_SIZE], char word[MAX_STRING_SIZE], int *n);
+command_typo_correct(char string[MAX_STRING_SIZE],
+					 char word[MAX_STRING_SIZE], int *n);
 
 int
-command_typo_complete(char string[MAX_STRING_SIZE], char word[MAX_STRING_SIZE], int *n);
+command_typo_complete(char string[MAX_STRING_SIZE],
+					  char word[MAX_STRING_SIZE], int *n);
 
 #endif

@@ -39,7 +39,7 @@ clean:
 	rm -f $(MK_EXECUTABLE) $(KNN_EXECUTABLE) $(MK_OBJECTS) $(KNN_OBJECT)
 
 pack:
-	zip -FSr 315CA_StoicaMihaiBogdan_Tema3.zip README Makefile *.c *.h
+	zip -FSr 315CA_StoicaMihaiBogdan_Tema3.zip README.md Makefile *.c *.h
 	
 .PHONY: pack clean build run_mk run_kNN
 

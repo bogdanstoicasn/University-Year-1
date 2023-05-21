@@ -24,32 +24,31 @@ int main(void)
 
 	dictionary *dict = create_dictionary();
 
-	while(1) {
+	while (1) {
 		command_number = interface_handler(word, &n);
-		switch(command_number) {
-			case 0:
-				// printf("You shouldn't be here\n"")
-				break;
-			case 1:
-				insert_function(dict, word);
-				break;
-			case 2:
-				load_function(dict, word);
-				// printf("File %s successfully loaded\n", word);
-				break;
-			case 3:
-				remove_function(dict, word);
-				break;
-			case 4:
-				autocorrect_function(dict, word, n);
-				break;
-			case 5:
-				autocomplete_function(dict, word, n);
-				break;
-			case 6:
-				//dictionary_printer(dict);
-				dictionary_destructor(dict);
-				return 0;
+		switch (command_number) {
+		case 0:
+			// "You shouldn't be here :))
+			break;
+		case 1:
+			insert_function(dict, word);
+			break;
+		case 2:
+			load_function(dict, word);
+			// printf("File %s successfully loaded\n", word);
+			break;
+		case 3:
+			remove_function(dict, word);
+			break;
+		case 4:
+			autocorrect_function(dict, word, n);
+			break;
+		case 5:
+			autocomplete_function(dict, word, n);
+			break;
+		case 6:
+			dictionary_destructor(dict);
+			return 0;
 		}
 	}
 	return 0;

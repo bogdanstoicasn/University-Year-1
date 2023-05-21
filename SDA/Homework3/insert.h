@@ -4,4 +4,4 @@
 
 void insert_function(dictionary *dict, char *word);
 
-# endif 
+# endif
