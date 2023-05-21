@@ -17,7 +17,7 @@ The files contained in this project are as follows:
 
 > hash.h, server.h, load_blalncer.h, utils.h
 
-There may be constant definitions, such as**OOP**with a value of 64.
+There may be constant definitions, such as **OOP** with a value of 64.
 
 ## Load Balancer
 
@@ -29,7 +29,7 @@ a server is stopped, only the objects located on that server need to be
 redistributed to nearby servers. Similarly, when a new server is added, it will
 only take over objects from a limited number of servers, the neighboring ones.
 
-The key points of the project are the functions**from load_balancer.c**file:
+The key points of the project are the functions **from load_balancer.c** file:
 
 > Allocating memory for the load balancer("**init_load_balancer**").
 
