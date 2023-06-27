@@ -23,12 +23,18 @@ fara a utiliza unealta de manipulare a imaginilor grafice, NETPBM.
 
 
 Punctele cheie ale temei sunt:
+
 > citirea imagini , care poate fi in format binary/ASCII ("read.c")
+
 > determinarea comenzii si a parametrilor ei ("interface.c")
+
 > functia de crop("function.c")
+
 > aplicare kernelului de imagine pentru BLUR, GAUSSIAN BLUR, EDGE
 SHARPEN ("kernel.c")
+
 > rotirea imagini dupa unghiul ales ("rotate.c")
+
 > salvarea imaginii in functie de tip ("print.c")
 
 Este folosita doar alocare dinamica pe matrice.
@@ -55,6 +61,7 @@ care este trecuta in locul vechii matrice de imagine.
 
 
 Aplicarea nucleelor de imagini:
+
 > se face pe selectia curenta
 
 > se aloca matrici noi pentru valorile obtinute dupa operatie
@@ -68,6 +75,7 @@ intershimbarea valorilor din selectie, astfel realizand o functie care poate
 fi utilizata si in programe scrise in viitor.
 
 Salvarea imaginii:
+
 > determinarea tipului de fisier in care trebuie sa scriem si
 deschiderea corespunzatoare
 
