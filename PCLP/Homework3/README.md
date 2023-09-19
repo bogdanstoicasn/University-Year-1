@@ -31,9 +31,9 @@ Commands:
 
 > *CROP* = crops an image based on selection
 
-> *SAVE*
+> *SAVE name type* = save the image(it gets the name and the type: binary or ASCII) 
 
-> *APPLY*     
+> *APPLY EDGE/BLUR/SHARPEN/GAUSSIAN_BLUR*
 
 The key points of the topic are:
 
