@@ -3,88 +3,70 @@
 #### Version 3, 29 June 2007
 # README check
 
-## Descriere
+## Description
 
-Acesta este un README care contine detalii si explicatii despre tema 3,
-care are numele de "Editor de imagini".
+This is a README that contains details and explanations about Theme 3, which is named "Image Editor."
 
-## Particularitati
+## Characteristics
 
-Fisiere *.c: kernel.c, function.c, interface.c, rotate.c, print.c, main.c
-Headere: kernel.h, function.h, interface.h, rotate.h, print.h
-Codul este compilat cu standardul din 1999.
-Pot aparea definiri de constante(exemplu: NMAX cu valoarea 50).
+Files *.c: kernel.c, function.c, interface.c, rotate.c, print.c, main.c
+Headers: kernel.h, function.h, interface.h, rotate.h, print.h
+The code is compiled with c99.
 
+## Image editor(image_editor)
 
-## Editor de imagini(image_editor)
-
-Tema abordata este construirea unui editor simplu de imagini, pentru terminal,
-fara a utiliza unealta de manipulare a imaginilor grafice, NETPBM.
+The topic addressed is the development of a simple image editor for the terminal,
+without using the graphical image manipulation tool, NETPBM.
 
 
-Punctele cheie ale temei sunt:
+The key points of the topic are:
 
-> citirea imagini , care poate fi in format binary/ASCII ("read.c")
+> Image reading, which can be in binary/ASCII format ("read.c").
 
-> determinarea comenzii si a parametrilor ei ("interface.c")
+> Determining the command and its parameters ("interface.c").
 
-> functia de crop("function.c")
+> The cropping function ("function.c").
 
-> aplicare kernelului de imagine pentru BLUR, GAUSSIAN BLUR, EDGE
-SHARPEN ("kernel.c")
+> Applying image kernels for BLUR, GAUSSIAN BLUR, EDGE SHARPEN ("kernel.c").
 
-> rotirea imagini dupa unghiul ales ("rotate.c")
+> Rotating the image by the chosen angle ("rotate.c").
 
-> salvarea imaginii in functie de tip ("print.c")
+> Saving the image according to its type ("print.c").
 
-Este folosita doar alocare dinamica pe matrice.
+The difference between an ASCII image and a binary image begins with the pixel reading,
+but up to that point, the image type, length, width, and maximum pixel value are in ASCII format.
+To store pixel values in a matrix of numbers, we read from ASCII format files using an "int" variable,
+and from binary format files, we read bit by bit and convert to "int".
+PGM images store values in the "red" matrix, while PPM images store values in the "red," "green," and "blue" matrices.
+The same structure is used for both types of images.
 
-Diferenta dintre o imagine ASCII si o imagine binary incepe de la 
-citirea pixelilor, insa pana acolo, tipul de imagine, lungimea, latimea si
-valoarea maxima a pixelilor sunt in format ASCII. Pentru a retine valorile
-pixelilor intr-o matrice de numere, din fisierele format ASCII citim cu o 
-variabila de tip "int", iar din fisierele binare citim cu "unsigned char", din
-bit in bit, si transformam in "int".
-Imaginile PGM retin valorile in matricea "red", iar imaginile PPM retin
-valorile in matricele "red", "green", "blue". Se foloseste aceeasi structura
-pentru ambele imagini.
+The first challenges were encountered when determining the commands, non-existent commands, as well as handling special cases.
+Therefore, for each command, a function was used that handles all possible cases and returns a corresponding number.
 
-
-Primele probleme au fost intampinate la determinarea comenzilor,
-comenzilor inexistente, precum si determinarea cazurilor speciale. Astfel,
-pentru fiecare comanda am folosit o functie care abordeaza toate cazurile
-posibile si returneaza un numar corespunzator.
+The crop function takes the coordinates stored in "select" and creates a new matrix, which replaces the old image matrix.
 
 
-Functia de crop ia coordonatele retinute in select si creeaza o noua matrice,
-care este trecuta in locul vechii matrice de imagine.
+Applying image kernels:
 
+> It is done on the current selection.
 
-Aplicarea nucleelor de imagini:
+> New matrices are allocated for the values obtained after the operation.
 
-> se face pe selectia curenta
+> The values are then transferred into the image matrix.
 
-> se aloca matrici noi pentru valorile obtinute dupa operatie
+Image rotation is performed by a function that can rotate regardless of the width and height of the file.
+Due to the crop command, this operation accesses unknown memory areas.
+This issue has been resolved by swapping the values in the selection, thus creating a function that can be used in future programs as well.
 
-> se trec valorile in matricea imaginii
+Saving the image:
 
-Rotirea imaginii este executata de o functie care roteste indiferent de
-latimea si lungimea fisierului. Din cauza comenzii crop, aceasta operatie
-accesa zone de memorie necunoscute. Am rezolvat aceast probleme prin
-intershimbarea valorilor din selectie, astfel realizand o functie care poate
-fi utilizata si in programe scrise in viitor.
+> Determining the type of file to write and opening the corresponding file.
 
-Salvarea imaginii:
-
-> determinarea tipului de fisier in care trebuie sa scriem si
-deschiderea corespunzatoare
-
-> scrirea datelor in fisier: tip de imagine,latime, inaltime,
-valoare maxima, pixeli
+> Writing the data to the file, including the image type, width, height, maximum value, and pixels.
 	
 
 
-## Resurse/materiale citite:
+## Resources:
 
 ->The C Programming Language. 2nd Edition
 	by Brian Kernighan and Dennis Ritchie
