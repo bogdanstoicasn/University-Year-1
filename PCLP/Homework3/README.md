@@ -18,6 +18,22 @@ The code is compiled with c99.
 The topic addressed is the development of a simple image editor for the terminal,
 without using the graphical image manipulation tool, NETPBM.
 
+Commands:
+> *LOAD path* = loads the image in the memory
+
+> *SELECT x1 y1 x2 y2* = makes a selection on an image
+
+> *HISTOGRAM h1 h2* = shows an histogram of a given image
+
+> *ROTATE angle* = rotates an image at a specific angle
+
+> *EQUALIZE* = equalize an image
+
+> *CROP* = crops an image based on selection
+
+> *SAVE*
+
+> *APPLY*     
 
 The key points of the topic are:
 
