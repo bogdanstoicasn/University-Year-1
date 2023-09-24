@@ -40,10 +40,10 @@ The sorting operation:
 
 The requirements for resizing and transposing a matrix are addressed as follows:
 
-	-a **double pointer** to the memory address of the matrix that needs modification is taken.
+	-a double pointer to the memory address of the matrix that needs modification is taken.
 	-a new, modified matrix is created in another memory location.
 	-the new modified matrix is linked to the position where the old matrix is in the vector.
-	-the memory allocated for the old matrix is released through **the pointer** variable
+	-the memory allocated for the old matrix is released through the pointer variable
 
 The Strassen Algorithm:
 
