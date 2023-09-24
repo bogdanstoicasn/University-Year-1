@@ -1,68 +1,60 @@
 #### Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
 # README check
 
-## Descriere
+## Description
 
-Acesta este un README care contine detalii si explicatii despre tema 2,
-care are numele de "Simulator de octave".
-
-
-## Particularitati
-
-Fisierele sunt: main.c, function.c, function.h.
-Se folosesc bibliotecile: stdio.h, stdlib.h, math.h.
-Codul este compilat cu standardul din 1999.
-Pot aparea definiri de constante(exemplu: NMAX cu valoarea 10007).
+This is a README that contains details and explanations about assignment 2,
+which is named "Octave Simulator."
 
 
-## Simulator de octave(my_octave)
+## Specifics
 
-Prima idee pentru tema aceasta ar fi fost folosirea unui "triplu pointer", insa 
-trebuia sa utilizez si alti vectori pentru a retine anumite variabile.
-Asadar, am ales abordarea cu vectori de structuri, pentru ca structura poate 
-stoca multe date utile pentru problema.
+Files: main.c, function.c, function.h.
+The code is compiled with the c99 standard.
 
-Alocarea dinamica a vectorului este relativ simpla, necesitand doar "realloc", 
-nefiind importanta operatia(inmultire, citire, Strassen). Partea mai muncitoreasca
-apare la functia de alocare a matricei, deoarece trebuia sa ne asiguram functia 
-prin programare defensiva. 
 
-Prima problema s-a ivit chiar in "inmultirea matricelor". Daca faceam inmultire,
-operatie de eliminare a unui element, si dupa ordonare, programul meu ajungea 
-intr-o zona de memorie care nu ii apartinea. Am rezolvat aceasta problema prin
-simplificarea functiei de inmultire("matrix_multiplication"): am scos conditia 
-care verifica daca numarul de coloane din prima matrice este egal cu numarul 
-de linii din a doua matrice, si am lasat doar inmultirea, care se petrece in
-conditii optime. Verific conditia de mai sus direct in fisierul "main.c",astfel
-programul meu ruland fara probleme.
+## Octave simulator(my_octave)
 
-Eliminarea unui element se face prin stergerea din memorie("free_matrix") a 
-matricei corespunzatoare si deplasarea cu o pozitie inapoi, 
-a elementelor ce il urmeaza.
+The initial idea for this assignment would have been to use a 'triple pointer,'
+but I needed to use other arrays to store certain variables.
+Therefore, I opted for the approach with arrays of structures because a structure can
+store a lot of useful data for the problem.
 
-Operatia de ordonare:
-	-se foloseste o sortare cu O(n^2) pasi;
-	-se interschimba valorile vectorului de structuri cand se indeplineste 
-	conditia ceruta;
+The dynamic allocation of the vector is relatively simple, requiring only 'realloc,'
+with the operation (multiplication, reading, Strassen) not being critical.
+The more labor-intensive part comes in the matrix allocation function, as we needed to ensure the function
+through defensive programming.
 
-Cerintele de redimensionare si transpunere a unei matrici sunt abordate la fel:
-	-se ia un dublu **pointer** catre adresa de memorie a matricei care trebuie 
-	modificata;
-	-se creeaza o matrice noua, modificata in alta locatie de memorie;
-	-se leaga, noua matrice modificata, de pozitia pe care se afla matricea veche, 
-	in vector;
-	-se elibereaza memoria alocata pentru matricea veche prin variabila **pointer**
+The first issue arose during 'matrix multiplication.' If I performed multiplication, the operation of removing an element,
+and then sorting, my program would end up in a memory area that didn't belong to it. I solved this problem by simplifying the
+'matrix_multiplication' function: I removed the condition that checks if the number of columns in the first matrix is equal
+to the number of rows in the second matrix, and I left only the multiplication, which occurs under optimal conditions.
+I directly check the above condition in the 'main.c' file, allowing my program to run without problems.
 
-Algoritmul Strassen:
+The removal of an element is done by freeing the memory ('free_matrix') of the corresponding matrix and shifting
+back by one position the elements that follow it.
+
+The sorting operation:
+	-it uses a sorting method with O(n^2) steps.
+	-it swaps the values of the structure vector when the required condition is met.
+
+The requirements for resizing and transposing a matrix are addressed as follows:
+
+	-a **double pointer** to the memory address of the matrix that needs modification is taken.
+	-a new, modified matrix is created in another memory location.
+	-the new modified matrix is linked to the position where the old matrix is in the vector.
+	-the memory allocated for the old matrix is released through **the pointer** variable
+
+The Strassen Algorithm:
+
+	'Strassen_algorithm_helper':
+
+		-first, the base case is handled when the matrix reaches a size of one row and one column.
+		-otherwise, the matrices to be multiplied are recursively divided into four increasingly smaller quadrants until the base case is reached.
+		-then, the multiplications are performed, resulting in the final matrix.
 	
-	"Strassen_algorithm_helper"
-	-mai intai se trateaza cazul banal, cand matricea ajunge la dimensiunea:
-	o linie, o coloana;
-	-altfel se impart, recursiv, matricele ce trebuie inmultite, in 4 cadrane din
-	ce in ce mai mici, pana se ajunge la cazul banal;
-	-apoi se fac inmultirile si se obtine matricea finala;
+ 	'Strassen_algorithm':
 
-	"Strassen_algorithm"
-	-se copiaza matricele de inmultit;
-	-se aplica "Strassen_algorithm_helper";
-	-matricea obtinuta se trece in a treia matrice;
+		-the matrices to be multiplied are copied.
+		-'Strassen_algorithm_helper' is applied.
+		-the resulting matrix is passed into a third matrix.
