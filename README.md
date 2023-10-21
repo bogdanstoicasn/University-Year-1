@@ -48,10 +48,15 @@ You must have the following:
 To compile and run the C programs, follow these steps:
 
 1. Clone this repository to your local machine:
+   
              git clone https://github.com/bogdanstoicasn/University-Year-1.git
 
-2. Navigate to the specific assignment's directory:
-3. Compile the C program:
+3. Navigate to the specific assignment's directory:
+   
+5. Compile the C program:
+   
              make build
-4. Run the program:
+  
+7. Run the program:
+   
           ./program
