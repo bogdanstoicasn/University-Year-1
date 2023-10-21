@@ -10,7 +10,7 @@ coursework and serve as a record of my learning and progress in C programming.
 
 ## Table of Contents
 
--[Assignments](##Assignments)
+-[Assignments](#Assignments)
 
 -[Requirements](##Requirements)
 
