@@ -17,7 +17,7 @@ coursework and serve as a record of my learning and progress in C programming.
 -[Usage](##Usage)
 
 
-## Asssignments
+## Assignments
 
 **Programming of Computers and Programming Languages** folder:
 
