@@ -1,4 +1,4 @@
-#### Copyright 2022-2023 Stoica Mihai-Bogdan 315CA (bogdanstoicasn@yahoo.com)
+#### Copyright 2022-2023 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
 #### GNU GENERAL PUBLIC LICENSE 
 #### Version 3, 29 June 2007
 # README check
