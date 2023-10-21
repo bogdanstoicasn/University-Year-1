@@ -1,4 +1,4 @@
-#### Copyright Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
+#### Copyright 2022-2023 Stoica Mihai-Bogdan (bogdanstoicasn@yahoo.com)
 # README check
 
 
