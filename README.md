@@ -12,9 +12,9 @@ coursework and serve as a record of my learning and progress in C programming.
 
 -[Assignments](#Assignments)
 
--[Requirements](##Requirements)
+-[Requirements](#Requirements)
 
--[Usage](##Usage)
+-[Usage](#Usage)
 
 
 ## Assignments
